@@ -2,7 +2,7 @@ import React, { useState, Suspense, useEffect } from "react";
 import SideMenu from "../Layout/SideMenu";
 import AddInventoryForm from "../Layout/AddInventory";
 import Transaction from "../Layout/Transaction";
-import Testing from "../UI/Testing";
+import Testing from "../UI/TransactionTable";
 //import { useNavigate } from 'react-router-dom'
 
 // Lazy load components
@@ -39,9 +39,9 @@ const AdminPage: React.FC = () => {
       case "customerList":
         return <div>List Pelanggan</div>;
       case "testing":
-        return <Testing />;
+        return <Testing onFetchProduct={()=>console.log("test")} />;
       default:
-        return <Testing />;
+        return <Testing onFetchProduct={()=>console.log("test")} />;
     }
   };
 

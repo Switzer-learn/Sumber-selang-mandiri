@@ -1,21 +1,64 @@
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import TransactionTable from "../UI/TransactionTable";
 
+interface SelectedProduct{
+    name: string;
+    amount: number;
+    price: number;
+    product_id: number;
+}
 
+interface CustomerData{
+    customer_id: string;
+    customer_name: string;
+    customer_phone_number: number;
+    customer_address: string;
+    hutang_customer: number;
+}
 
 const Transaction = () =>{
     const [customerName,setCustomerName] = useState<string>("");
-    const [customerData,setCustomerData] = useState<any[]>([]);
+    const [customerData,setCustomerData] = useState<CustomerData[]>([]);
     const [customerId,setCustomerId] = useState<string>("");
     const [cashierName,setCashierName] = useState<string>("");
     const [customerPhoneNumber,setCustomerPhoneNumber] = useState<number>(0);
     const [customerAddress,setCustomerAddress] = useState<string>("");
     const [hutangCustomer,setHutangCustomer] = useState<number>(0);
+    const [productData,setProductData] = useState<SelectedProduct[]>([]);
+    const [grandTotal,setGrandTotal] = useState<number>(0);
 
+    useEffect(()=>{
+        setCashierName("");
+    },[])
 
-    const handleSubmit =()=>{
+    useEffect(()=>{
+        setCustomerData([]);
+    },[customerName])
+
+    const handleSubmit =(e:React.FormEvent)=>{
+        e.preventDefault();
+        const formData = {
+            customer_id:customerId,
+            cashier_name:cashierName,
+            customer_name:customerName,
+            customer_phone_number:customerPhoneNumber,
+            customer_address:customerAddress,
+            hutang_customer:hutangCustomer,
+            product_data:productData,
+            grand_total:grandTotal
+        }
         console.log("submit Pressed")
+        console.log(formData);
+    }
+
+    
+
+    const fetchProduct = (data:SelectedProduct[],grandTotal:number) =>{
+        console.log(data,grandTotal);
+        setGrandTotal(grandTotal);
+        setProductData(data);
     }
 
     const resetForm = () =>{
@@ -27,7 +70,7 @@ const Transaction = () =>{
     }
 
     return(
-        <div id="addInventory" className="flex flex-col items-center p-4">
+        <div id="addInventory" className="flex flex-col items-center p-4 max-h-screen overflow-y-auto">
             <h1 className="text-2xl font-bold underline mb-4">Transaksi</h1>
               <form
                 onSubmit={handleSubmit}
@@ -43,7 +86,7 @@ const Transaction = () =>{
                         id="customerName"
                         freeSolo
                         value={customerName}
-                        options={customerData.map((option) => option.name)}
+                        options={customerData.map((option) => option.customer_name)}
                         onInputChange={(_event, newValue) => setCustomerName(newValue)}
                         renderInput={(params) => (
                         <TextField {...params} label="Nama Pelanggan" required />
@@ -69,14 +112,12 @@ const Transaction = () =>{
                     {/* Hutang */}
                     <div className="flex flex-col gap-2">
                         <label htmlFor="hutangCustomer" className="font-medium">
-                            Hutang Pelanggan:
+                            Hutang Pelanggan: <span className="text-sm text-gray-500">(sisa hutang customer)</span>
                         </label>
-                        <TextField
+                        <span
                             id="hutangCustomer"
-                            value={hutangCustomer}
-                            onChange={(e) => setHutangCustomer(e.target.value ? parseInt(e.target.value) : 0)}
-                            label="Hutang Pelanggan"
-                        />
+                            className="border rounded-lg px-3 py-4"
+                        >{hutangCustomer}</span>
                     </div>
                 </div>
                 <div>
@@ -111,10 +152,9 @@ const Transaction = () =>{
                     />
                     </div>
                 </div>
-                
-        
-                
-        
+                <div className="col-span-2">
+                  <TransactionTable onFetchProduct={fetchProduct} />
+                </div>
                 {/* Buttons */}
                 <div className="col-span-2 flex justify-between">
                   <button

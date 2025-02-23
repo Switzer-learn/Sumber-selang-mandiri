@@ -1,0 +1,8 @@
+{
+  "products": [
+    { "name": "Baut", "stock": 60, "price": 75000, "product_id": 1, "type": "goods" },
+    { "name": "Kabel", "stock": 30, "price": 50000, "product_id": 2, "type": "goods" },
+    { "name": "Lampu", "stock": 15, "price": 25000, "product_id": 3, "type": "goods" },
+    { "name": "Selang", "stock": 120, "price": 150000, "product_id": 4, "type": "goods" }
+  ]
+}

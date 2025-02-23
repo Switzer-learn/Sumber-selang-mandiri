@@ -6,9 +6,7 @@ interface SideMenuProps {
 }
 
 const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
-  const [employeeOpen, setEmployeeOpen] = useState(false);
   const [inventoryOpen, setInventoryOpen] = useState(false);
-  const [financeOpen, setFinanceOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); // For mobile responsiveness
   //const [serviceOpen, setServiceOpen] = useState(false);
   //const navigate = useNavigate();
@@ -47,30 +45,6 @@ const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
             <div>
               <button
                 className="w-full text-left py-2 px-4 hover:bg-green-700"
-                onClick={() => setEmployeeOpen(!employeeOpen)}
-              >
-                Managemen Pegawai
-              </button>
-              {employeeOpen && (
-                <ul className="px-4 text-md font-normal flex flex-col">
-                  <button
-                    className="hover:text-lg text-start py-1 px-2"
-                    onClick={() => onMenuClick("AddEmployee")}
-                  >
-                    Tambah Pegawai
-                  </button>
-                  <button
-                    className="hover:text-lg text-start py-1  px-2"
-                    onClick={() => onMenuClick("EmployeeList")}
-                  >
-                    List Pegawai
-                  </button>
-                </ul>
-              )}
-            </div>
-            <div>
-              <button
-                className="w-full text-left py-2 px-4 hover:bg-green-700"
                 onClick={() => setInventoryOpen(!inventoryOpen)}
               >
                 Persediaan
@@ -95,26 +69,10 @@ const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
             <div>
               <button
                 className="w-full text-left py-2 px-4 hover:bg-green-700"
-                onClick={() => setFinanceOpen(!financeOpen)}
+                onClick={() => onMenuClick("RevenueReport")}
               >
                 Keuangan
               </button>
-              {financeOpen && (
-                <ul className="px-4 text-md font-normal">
-                  <button
-                    className="hover:text-lg text-start py-1 px-2"
-                    onClick={() => onMenuClick("revenueReport")}
-                  >
-                    Laporan Omzet
-                  </button>
-                  <button
-                    className="hover:text-lg text-start py-1 px-2"
-                    onClick={() => onMenuClick("transactionList")}
-                  >
-                    List Transaksi
-                  </button>
-                </ul>
-              )}
             </div>
             <div>
               <button

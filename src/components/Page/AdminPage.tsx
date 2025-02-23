@@ -3,6 +3,9 @@ import SideMenu from "../Layout/SideMenu";
 import AddInventoryForm from "../Layout/AddInventory";
 import Transaction from "../Layout/Transaction";
 import Testing from "../UI/TransactionTable";
+import ProductListnStock from "../Layout/ProductListnStock";
+import CustomerList from "../Layout/CustomerList";
+import RevenueReport from "../Layout/RevenueReport";
 //import { useNavigate } from 'react-router-dom'
 
 // Lazy load components
@@ -22,24 +25,18 @@ const AdminPage: React.FC = () => {
 
   const displayContent = () => {
     switch (selectedMenu) {
-      case "AddEmployee":
-        return <div>Tambah Pegawai</div>;
-      case "EmployeeList":
-        return <div>List Pegawai</div>;
       case "addInventory":
         return <AddInventoryForm />;
       case "inventoryList":
-        return <div>List Produk</div>;
-      case "revenueReport":
-        return <div>Laporan Omzet</div>;
-      case "transactionList":
-        return <div>List Transaksi</div>;
+        return <ProductListnStock />;
+      case "RevenueReport":
+        return <RevenueReport />;
       case "cashier":
         return <Transaction />;
       case "customerList":
-        return <div>List Pelanggan</div>;
+        return <CustomerList />;
       case "testing":
-        return <Testing onFetchProduct={()=>console.log("test")} />;
+        return <ProductListnStock />;
       default:
         return <Testing onFetchProduct={()=>console.log("test")} />;
     }

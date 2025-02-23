@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { formatPrice } from "../../function.tsx/function";
 import { Autocomplete, TextField } from "@mui/material";
 import { Product } from "../interface/ProductInterface";
+import {products} from "../../data/dummyProduct.json";
+import { SelectedProduct } from "../interface/SelectedProductInterface";
 
 interface TransactionTableProps {
   onFetchProduct: (
@@ -10,29 +12,20 @@ interface TransactionTableProps {
   ) => void;
 }
 
-interface SelectedProduct {
-  name: string;
-  amount: number;
-  price: number;
-  product_id: number;
-  subtotal: number;
-  stock: number;
-}
-
 const TransactionTable: React.FC<TransactionTableProps> = ({ onFetchProduct }) => {
   const [originalProducts, setOriginalProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(() => {
-    setOriginalProducts(products);
+    setOriginalProducts( products );
   }, []);
 
   useEffect(() => {
     const newTotal = selectedProducts.reduce((acc, curr) => acc + curr.subtotal, 0);
     setTotalAmount(newTotal);
     onFetchProduct(selectedProducts, newTotal);
-  }, [selectedProducts]);
+  }, [onFetchProduct, selectedProducts]);
 
   const handleProductChange = (index: number, value: string) => {
     const product = originalProducts.find((p) => p.name === value);
@@ -146,9 +139,3 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onFetchProduct }) =
 
 export default TransactionTable;
 
-const products = [
-  { name: "Baut", stock: 60, price: 75000, product_id: 1, type: "goods" },
-  { name: "Kabel", stock: 30, price: 50000, product_id: 2, type: "goods" },
-  { name: "Lampu", stock: 15, price: 25000, product_id: 3, type: "goods" },
-  { name: "Selang", stock: 120, price: 150000, product_id: 4, type: "goods" },
-];

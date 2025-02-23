@@ -2,6 +2,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 import TransactionTable from "../UI/TransactionTable";
+import { currentDate } from "../../function.tsx/function";
 
 interface SelectedProduct{
     name: string;
@@ -28,6 +29,7 @@ const Transaction = () =>{
     const [hutangCustomer,setHutangCustomer] = useState<number>(0);
     const [productData,setProductData] = useState<SelectedProduct[]>([]);
     const [grandTotal,setGrandTotal] = useState<number>(0);
+    const [metodePembayaran,setMetodePembayaran] = useState<string>("Cash");
 
     useEffect(()=>{
         setCashierName("");
@@ -47,7 +49,9 @@ const Transaction = () =>{
             customer_address:customerAddress,
             hutang_customer:hutangCustomer,
             product_data:productData,
-            grand_total:grandTotal
+            grand_total:grandTotal,
+            metode_pembayaran:metodePembayaran,
+            date:currentDate()
         }
         console.log("submit Pressed")
         console.log(formData);
@@ -150,6 +154,14 @@ const Transaction = () =>{
                         rows={3}
                         required
                     />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <span className="font-medium">Metode Pembayaran</span>
+                        <select className="border rounded-lg px-3 py-4" value={metodePembayaran} onChange={(e) => setMetodePembayaran(e.target.value)}>
+                            <option value="Cash">Cash</option>
+                            <option value="Bon">Bon</option>
+                        </select>
                     </div>
                 </div>
                 <div className="col-span-2">

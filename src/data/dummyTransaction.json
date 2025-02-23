@@ -1,0 +1,165 @@
+{
+    "transactions": [
+      {
+        "transaction_id": 1,
+        "date": "2025-02-20",
+        "customer": { "name": "Budi", "id": 1, "hutang": 0 },
+        "payment_type": "cash",
+        "grandtotal": 225000,
+        "products": [
+          { "product_id": 1, "name": "Baut", "quantity": 2, "unit_price": 75000 },
+          { "product_id": 3, "name": "Lampu", "quantity": 3, "unit_price": 25000 }
+        ]
+      },
+      {
+        "transaction_id": 2,
+        "date": "2025-02-21",
+        "customer": { "name": "Siti", "id": 2, "hutang": 1000000 },
+        "payment_type": "bon",
+        "grandtotal": 350000,
+        "products": [
+          { "product_id": 2, "name": "Kabel", "quantity": 5, "unit_price": 50000 },
+          { "product_id": 4, "name": "Selang", "quantity": 2, "unit_price": 150000 }
+        ]
+      },
+      {
+        "transaction_id": 3,
+        "date": "2025-02-22",
+        "customer": { "name": "Tia", "id": 3, "hutang": 0 },
+        "payment_type": "cash",
+        "grandtotal": 150000,
+        "products": [
+          { "product_id": 1, "name": "Baut", "quantity": 2, "unit_price": 75000 },
+          { "product_id": 3, "name": "Lampu", "quantity": 3, "unit_price": 25000 }
+        ]
+      },
+      {
+        "transaction_id": 4,
+        "date": "2025-02-23",
+        "customer": { "name": "Rio", "id": 4, "hutang": 500000 },
+        "payment_type": "bon",
+        "grandtotal": 450000,
+        "products": [
+          { "product_id": 2, "name": "Kabel", "quantity": 5, "unit_price": 50000 },
+          { "product_id": 4, "name": "Selang", "quantity": 2, "unit_price": 150000 },
+          { "product_id": 5, "name": "Paku", "quantity": 10, "unit_price": 5000 }
+        ]
+      },
+      {
+        "transaction_id": 5,
+        "date": "2025-02-20",
+        "customer": { "name": "Eko", "id": 5, "hutang": 0 },
+        "payment_type": "cash",
+        "grandtotal": 175000,
+        "products": [
+          { "product_id": 1, "name": "Baut", "quantity": 2, "unit_price": 75000 },
+          { "product_id": 6, "name": "Obeng", "quantity": 1, "unit_price": 25000 }
+        ]
+      },
+    {
+      "transaction_id": 6,
+      "date": "2025-02-21",
+      "customer": { "name": "Rina", "id": 6, "hutang": 2000000 },
+      "payment_type": "bon",
+      "grandtotal": 250000,
+      "products": [{ "product_id": 2, "name": "Kabel", "quantity": 5, "unit_price": 50000 }]
+    },
+    {
+      "transaction_id": 7,
+      "date": "2025-02-22",
+      "customer": { "name": "Dian", "id": 7, "hutang": 0 },
+      "payment_type": "cash",
+      "grandtotal": 75000,
+      "products": [{ "product_id": 3, "name": "Lampu", "quantity": 3, "unit_price": 25000 }]
+    },
+    {
+      "transaction_id": 8,
+      "date": "2025-02-23",
+      "customer": { "name": "Rudi", "id": 8, "hutang": 1500000 },
+      "payment_type": "bon",
+      "grandtotal": 300000,
+      "products": [{ "product_id": 4, "name": "Selang", "quantity": 2, "unit_price": 150000 }]
+    },
+    {
+      "transaction_id": 9,
+      "date": "2025-02-20",
+      "customer": { "name": "Lisa", "id": 9, "hutang": 0 },
+      "payment_type": "cash",
+      "grandtotal": 150000,
+      "products": [{ "product_id": 1, "name": "Baut", "quantity": 2, "unit_price": 75000 }]
+    },
+    {
+      "transaction_id": 10,
+      "date": "2025-02-21",
+      "customer": { "name": "Bambang", "id": 10, "hutang": 1000000 },
+      "payment_type": "bon",
+      "grandtotal": 250000,
+      "products": [{ "product_id": 2, "name": "Kabel", "quantity": 5, "unit_price": 50000 }]
+    },
+    {
+      "transaction_id": 11,
+      "date": "2025-02-22",
+      "customer": { "name": "Budi", "id": 1, "hutang": 0 },
+      "payment_type": "cash",
+      "grandtotal": 75000,
+      "products": [{ "product_id": 3, "name": "Lampu", "quantity": 3, "unit_price": 25000 }]
+    },
+    {
+      "transaction_id": 12,
+      "date": "2025-02-23",
+      "customer": { "name": "Siti", "id": 2, "hutang": 1000000 },
+      "payment_type": "bon",
+      "grandtotal": 300000,
+      "products": [{ "product_id": 4, "name": "Selang", "quantity": 2, "unit_price": 150000 }]
+    },
+    {
+      "transaction_id": 13,
+      "date": "2025-02-20",
+      "customer": { "name": "Tia", "id": 3, "hutang": 0 },
+      "payment_type": "cash",
+      "grandtotal": 150000,
+      "products": [{ "product_id": 1, "name": "Baut", "quantity": 2, "unit_price": 75000 }]
+    },
+    {
+      "transaction_id": 14,
+      "date": "2025-02-21",
+      "customer": { "name": "Rio", "id": 4, "hutang": 500000 },
+      "payment_type": "bon",
+      "grandtotal": 250000,
+      "products": [{ "product_id": 2, "name": "Kabel", "quantity": 5, "unit_price": 50000 }]
+    },
+    {
+      "transaction_id": 15,
+      "date": "2025-02-22",
+      "customer": { "name": "Eko", "id": 5, "hutang": 0 },
+      "payment_type": "cash",
+      "grandtotal": 75000,
+      "products": [{ "product_id": 3, "name": "Lampu", "quantity": 3, "unit_price": 25000 }]
+    },
+    {
+      "transaction_id": 16,
+      "date": "2025-02-23",
+      "customer": { "name": "Rina", "id": 6, "hutang": 2000000 },
+      "payment_type": "bon",
+      "grandtotal": 300000,
+      "products": [{ "product_id": 4, "name": "Selang", "quantity": 2, "unit_price": 150000 }]
+    },
+    {
+      "transaction_id": 17,
+      "date": "2025-02-20",
+      "customer": { "name": "Dian", "id": 7, "hutang": 0 },
+      "payment_type": "cash",
+      "grandtotal": 150000,
+      "products": [{ "product_id": 1, "name": "Baut", "quantity": 2, "unit_price": 75000 }]
+    },
+    {
+      "transaction_id": 18,
+      "date": "2025-02-21",
+      "customer": { "name": "Rudi", "id": 8, "hutang": 1500000 },
+      "payment_type": "bon",
+      "grandtotal": 250000,
+      "products": [{ "product_id": 2, "name": "Kabel", "quantity": 5, "unit_price": 50000 }]
+    }
+  ]
+}
+

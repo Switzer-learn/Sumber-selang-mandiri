@@ -2,38 +2,25 @@ import * as React from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 
+interface Inventory {
+  name: string;
+  jumlah: number;
+  satuan: string;
+  keterangan: string;
+  harga: number;
+}
+
 const AddInventoryForm: React.FC = () => {
   const [jumlah, setJumlah] = React.useState<number | null>(0);
   const [satuan, setSatuan] = React.useState<string>("pcs");
   const [keterangan, setKeterangan] = React.useState<string>("");
   const [harga, setHarga] = React.useState<number | null>(0);
   const [inventoryName, setInventoryName] = React.useState<string>("");
-  const [inventoryId, setInventoryId] = React.useState<string>("");
-  const [inventoryData, setInventoryData] = React.useState<any[]>([]);
+  const [inventoryData, setInventoryData] = React.useState<Inventory[]>([]);
   const [jenis,setJenis] = React.useState<string>("Barang");
-
-  // Fetch inventory data once on mount
-  /*React.useEffect(() => {
-    
-  }, []);
-
-  // Update fields when inventoryName changes
-  React.useEffect(() => {
-    const matchedInventory = inventoryData.find((item) => item.name === inventoryName);
-    if (matchedInventory) {
-      setInventoryId(matchedInventory.inventory_id || "");
-      setJumlah(matchedInventory.amount || 0);
-      setSatuan(matchedInventory.unit || "pcs");
-      setKeterangan(matchedInventory.description || "");
-      setHarga(matchedInventory.price || 0);
-    } else if (inventoryName === "") {
-      resetForm();
-    }
-  }, [inventoryName]);*/
 
   // Reset form fields
   const resetForm = () => {
-    setInventoryId("");
     setInventoryName("");
     setJumlah(0);
     setSatuan("pcs");
@@ -44,7 +31,6 @@ const AddInventoryForm: React.FC = () => {
   const handleSubmit = async (_event: React.FormEvent) => {
     _event.preventDefault();
     const formData = {
-      inventoryId,
       inventoryName,
       jumlah,
       satuan,
@@ -61,20 +47,6 @@ const AddInventoryForm: React.FC = () => {
         onSubmit={handleSubmit}
         className="border rounded-lg p-5 shadow-md grid grid-cols-2 gap-4 w-full max-w-4xl bg-white"
       >
-        {/* ID Barang */}
-        <div className="flex flex-col gap-2">
-          <label htmlFor="inventoryID" className="font-medium">
-            ID Barang: <span className="text-sm text-gray-500">jika ingin memasukan data baru pastikan id barang 0</span>
-          </label>
-          <input
-            id="inventoryID"
-            type="text"
-            value={inventoryId}
-            disabled
-            className="px-3 py-4 border rounded"
-          />
-        </div>
-
         {/* Nama Barang */}
         <div className="flex flex-col gap-2">
           <label htmlFor="inventoryName" className="font-medium">

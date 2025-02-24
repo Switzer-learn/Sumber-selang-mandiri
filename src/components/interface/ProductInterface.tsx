@@ -4,4 +4,5 @@ export interface Product {
     product_id: number;
     stock: number;
     type: string;
+    keterangan: string;
   }

@@ -1,19 +1,39 @@
-import { useState } from "react";
-//import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaUser,FaLock } from "react-icons/fa";
+import { api } from "../../service/api";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   //const [failedLogin,setFailedLogin] = useState(false);
 
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    const checkUser = async()=>{
+      const currentUser = await api.getCurrentUser();
+      if(currentUser){
+        navigate('/adminpage')
+      }
+    }
+    checkUser();
+  },[])
 
   // Handle login form submission.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = { email, password };
     console.log(formData);
+    const loginResponse = await api.login(formData);
+    if(loginResponse){
+      if(loginResponse.status===200){
+        alert(loginResponse.message)
+        navigate("/adminpage")
+      }else{
+        alert(loginResponse.message)
+      }
+    }
   };
 
   const handleForgotPassword = async(e: React.FormEvent) =>{
@@ -58,18 +78,13 @@ const LoginPage = () => {
 
             {/* Remember Me and Forgot Password */}
             <div className="flex justify-between text-sm text-gray-500">
-              <button onClick={handleForgotPassword} className="hover:text-indigo-500">Forgot password?</button>
+              <button type="button" onClick={handleForgotPassword} className="hover:text-indigo-500">Forgot password?</button>
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
               className="w-full py-3 text-lg font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-700 transition duration-200"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSubmit(e);
-                }
-              }}
             >
               Sign In
             </button>

@@ -1,14 +1,7 @@
 import * as React from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-
-interface Inventory {
-  name: string;
-  jumlah: number;
-  satuan: string;
-  keterangan: string;
-  harga: number;
-}
+import { Product } from "../interface/ProductInterface";
 
 const AddInventoryForm: React.FC = () => {
   const [jumlah, setJumlah] = React.useState<number | null>(0);
@@ -16,7 +9,7 @@ const AddInventoryForm: React.FC = () => {
   const [keterangan, setKeterangan] = React.useState<string>("");
   const [harga, setHarga] = React.useState<number | null>(0);
   const [inventoryName, setInventoryName] = React.useState<string>("");
-  const [inventoryData, setInventoryData] = React.useState<Inventory[]>([]);
+  const [inventoryData, setInventoryData] = React.useState<Product[]>([]);
   const [jenis,setJenis] = React.useState<string>("Barang");
 
   // Reset form fields

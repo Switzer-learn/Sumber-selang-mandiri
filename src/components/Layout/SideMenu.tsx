@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-//import {useNavigate} from 'react-router-dom'
+import { api } from "../../service/api";
+import {useNavigate} from 'react-router-dom'
 
 interface SideMenuProps {
   onMenuClick: (menu: string) => void;
@@ -9,10 +10,14 @@ const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); // For mobile responsiveness
   //const [serviceOpen, setServiceOpen] = useState(false);
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleLogOut = async() =>{
-    
+    const response = await api.logout();
+    if(response.status===200){
+      alert("Successfull logout")
+      navigate("/");
+    }
   }
 
   return (

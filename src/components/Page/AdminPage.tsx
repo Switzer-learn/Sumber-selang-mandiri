@@ -2,21 +2,40 @@ import React, { useState, Suspense, useEffect } from "react";
 import SideMenu from "../Layout/SideMenu";
 import AddInventoryForm from "../Layout/AddInventory";
 import Transaction from "../Layout/Transaction";
-import Testing from "../UI/TransactionTable";
 import ProductListnStock from "../Layout/ProductListnStock";
 import CustomerList from "../Layout/CustomerList";
 import RevenueReport from "../Layout/RevenueReport";
-//import { useNavigate } from 'react-router-dom'
-
-// Lazy load components
-
+import EmployeeRegister from "../Layout/addEmployee"
+import { useNavigate } from 'react-router-dom'
+import { api } from "../../service/api"
 
 const AdminPage: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState("");
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(()=>{
-    
+    const checkUser = async() =>{
+      const currentUser = await api.getCurrentUser();
+      console.log(currentUser)
+      if(currentUser){
+        const checkRole = await api.checkRole(currentUser.id);
+        if (checkRole.role){
+          console.log(checkRole.role[0])
+          if(checkRole.role[0].role==="admin")
+          {
+            console.log("User is Admin")
+          }else if(checkRole.role[0].role==="cashier"){
+            console.log("User is Cashier")
+          }else{
+            console.log("User role is unknown")
+          }
+        }
+      }else{
+        alert("Unauthorized");
+        navigate("/");
+      }
+    }
+    checkUser();
   },[])
   
   const handleSideMenuClick = (menu: string) => {
@@ -38,7 +57,7 @@ const AdminPage: React.FC = () => {
       case "testing":
         return <ProductListnStock />;
       default:
-        return <Testing onFetchProduct={()=>console.log("test")} />;
+        return <EmployeeRegister />;
     }
   };
 

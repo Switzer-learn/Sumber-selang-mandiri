@@ -2,124 +2,154 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. Tabel Users (untuk Admin & Kasir)
+-- 1. Drop existing tables if they exist
+DROP TABLE IF EXISTS transaction_items;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS product_purchases;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS customers;
+DROP TABLE IF EXISTS users;
+
+-- 2. Create Users Table
 CREATE TABLE users (
-    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id uuid PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
     role TEXT CHECK (role IN ('admin', 'cashier')) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Tabel Products (Gabungan Barang dan Jasa)
+-- 3. Create Products Table (Updated)
 CREATE TABLE products (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     type TEXT CHECK (type IN ('goods', 'service')) NOT NULL,
     description TEXT,
-    stock INTEGER, -- Hanya berlaku untuk 'goods'; bisa dibiarkan NULL untuk 'service'
-    buy_price NUMERIC(10,2), -- Harga beli (berlaku untuk barang)
-    sell_price NUMERIC(10,2) NOT NULL, -- Harga jual
-    avg_buy_price NUMERIC(10,2), -- Rata-rata harga beli; hanya untuk barang
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    stock INTEGER, -- Only applies to 'goods'; NULL for 'service'
+    avg_buy_price NUMERIC, -- Average buying price (for reporting)
+    sell_price NUMERIC NOT NULL, -- Current selling price
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_updated TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Tabel Customers
+-- 4. Create Product Purchases Table (Tracks Buying Prices & Stock Updates)
+CREATE TABLE product_purchases (
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    product_id uuid REFERENCES products(id),
+    purchase_date TIMESTAMPTZ DEFAULT NOW(),
+    buying_price NUMERIC NOT NULL,
+    quantity_purchased INTEGER NOT NULL
+);
+
+-- 5. Create Customers Table
 CREATE TABLE customers (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
-    contact_info TEXT, -- Misal: nomor telepon atau email
     address TEXT,
-    phone_number NUMERIC(15) NOT NULL,
-    cash_bon NUMERIC(10,2) DEFAULT 0, -- Jumlah bon yang dimiliki customer
+    phone_number TEXT NOT NULL,
+    cash_bon NUMERIC DEFAULT 0, -- Customer credit balance
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. Tabel Transactions (Transaksi Penjualan)
+-- 6. Create Transactions Table (Sales Records)
 CREATE TABLE transactions (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     customer_id uuid REFERENCES customers(id),
     cashier_id uuid REFERENCES users(id),
-    payment_type TEXT CHECK (payment_type IN ('cash', 'bon')) NOT NULL, -- Metode pembayaran
-    total_amount NUMERIC(10,2) NOT NULL,
+    payment_type TEXT CHECK (payment_type IN ('cash', 'bon')) NOT NULL, -- Payment method
+    grand_total NUMERIC NOT NULL,
+    sale_date TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 5. Tabel Transaction Items (Detail tiap item dalam transaksi)
+-- 7. Create Transaction Items Table (Details of Each Sale)
 CREATE TABLE transaction_items (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     transaction_id uuid REFERENCES transactions(id),
     product_id uuid REFERENCES products(id),
     quantity INTEGER NOT NULL,
-    unit_price NUMERIC(10,2) NOT NULL,
-    total_price NUMERIC(10,2) NOT NULL, -- Biasanya: quantity * unit_price (bisa dikurangi diskon)
-    discount NUMERIC(10,2) DEFAULT 0, -- Opsional: nilai diskon per item
+    unit_price NUMERIC NOT NULL,
+    total_price NUMERIC NOT NULL, -- Usually: quantity * unit_price (discount applied if any)
+    discount NUMERIC DEFAULT 0, -- Optional: discount per item
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+
 -- Set row-level security for each table
-CREATE POLICY select_users ON users FOR SELECT TO authenticated USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY insert_users ON users FOR INSERT WITH CHECK (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_users ON users FOR UPDATE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_users ON users FOR DELETE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY select_users ON users FOR SELECT TO authenticated USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY insert_users ON users FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY update_users ON users FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY delete_users ON users FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
 
 CREATE POLICY select_products ON products FOR SELECT TO authenticated;
-CREATE POLICY insert_products ON products FOR INSERT WITH CHECK (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_products ON products FOR UPDATE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_products ON products FOR DELETE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY insert_products ON products FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY update_products ON products FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY delete_products ON products FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
 
 CREATE POLICY select_customers ON customers FOR SELECT TO authenticated;
-CREATE POLICY insert_customers ON customers FOR INSERT WITH CHECK (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_customers ON customers FOR UPDATE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_customers ON customers FOR DELETE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY insert_customers ON customers FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY update_customers ON customers FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY delete_customers ON customers FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
 
 CREATE POLICY select_transactions ON transactions FOR SELECT TO authenticated;
-CREATE POLICY insert_transactions ON transactions FOR INSERT WITH CHECK (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_transactions ON transactions FOR UPDATE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_transactions ON transactions FOR DELETE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY insert_transactions ON transactions FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY update_transactions ON transactions FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY delete_transactions ON transactions FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
 
 CREATE POLICY select_transaction_items ON transaction_items FOR SELECT TO authenticated;
-CREATE POLICY insert_transaction_items ON transaction_items FOR INSERT WITH CHECK (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_transaction_items ON transaction_items FOR UPDATE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_transaction_items ON transaction_items FOR DELETE USING (id = (SELECT user_id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY insert_transaction_items ON transaction_items FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY update_transaction_items ON transaction_items FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+CREATE POLICY delete_transaction_items ON transaction_items FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+
+
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transaction_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_purchases ENABLE ROW LEVEL SECURITY;
+
 
 CREATE OR REPLACE FUNCTION get_transaction_details()
 RETURNS TABLE (
     transaction_id VARCHAR,
+    transaction_grand_total NUMERIC,
+    transaction_cashier VARCHAR,
+    transaction_payment_type VARCHAR,
+
     product_name VARCHAR,
-    quantity NUMERIC,
-    schedule TIMESTAMP,
-    payment_method TEXT,
+    product_quantity NUMERIC,
+    product_price NUMERIC,
+    product_discount NUMERIC,
+
     customer_name VARCHAR,
     customer_phone VARCHAR,
-    therapist_name VARCHAR,
-    service_name VARCHAR,
-    service_price NUMERIC,
-    service_duration NUMERIC
+    customer_hutang NUMERIC,
+
+    created_at TIMESTAMPTZ
 ) AS $$
 BEGIN
     RETURN QUERY
     SELECT 
         ts.transaction_id,
-        t.amount,
-        t.paid,
-        t.schedule,
-        t.payment_method,
-        c.customer_name,
-        c.phone_number AS customer_phone,
-        e.full_name AS therapist_name,
-        s.service_name,
-        s.service_price,
-        s.service_duration
-    FROM transaction_service ts
-    LEFT JOIN transactions t ON ts.transaction_id = t.transaction_id
-    LEFT JOIN customers c ON t.customer_id = c.auth_user_id
-    LEFT JOIN employees e ON t.therapist_id = e.employee_id
-    LEFT JOIN services s ON ts.service_id = s.service_id;
+        t.grand_total,
+        t.cashier_id,
+        t.payment_type,
+
+        ti.product_id,
+        ti.quantity,
+        ti.unit_price,
+        ti.discount,
+
+        c.name,
+        c.phone_number,
+        c.hutang,
+
+        t.created_at
+    FROM transaction_items ti
+    LEFT JOIN transactions t ON ts.transaction_id = t.id
+    LEFT JOIN customers c ON t.customer_id = c.id
+    LEFT JOIN users u ON t.cashier_id = u.id
+    LEFT JOIN products p ON ti.product_id = p.id;
 END;
 $$ LANGUAGE plpgsql;

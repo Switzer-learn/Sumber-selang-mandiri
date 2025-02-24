@@ -10,6 +10,11 @@ const ProductListnStock = () => {
         setProductData(products);
     }, []);
 
+    const editProduct = (index: number) => {
+        // Implement edit product logic here
+        console.log(index);
+    };
+
     const deleteProduct = (index: number) => {
         setProductData(productData.filter((_, i) => i !== index));
     };
@@ -26,7 +31,7 @@ const ProductListnStock = () => {
                             <th className="py-3 px-6 text-left">Stock</th>
                             <th className="py-3 px-6 text-left">Harga</th>
                             <th className="py-3 px-6 text-left">Tipe</th>
-                            <th className="py-3 px-6 text-left">Hapus</th>
+                            <th className="py-3 px-6 text-left">Action</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-600 text-sm font-light">
@@ -37,13 +42,20 @@ const ProductListnStock = () => {
                                 <td className="py-3 px-6 text-left">{product.stock}</td>
                                 <td className="py-3 px-6 text-left">Rp.{formatPrice(product.price)},-</td>
                                 <td className="py-3 px-6 text-left">{product.type}</td>
-                                <td className="py-3 px-6 text-left">
+                                <td className="py-3 px-6 text-left space-y-2 md:space-x-2 md:space-y-0">
+                                <button 
+                                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                        onClick={() => editProduct(index)}
+                                    >
+                                        Edit
+                                    </button>
                                     <button 
                                         className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                                         onClick={() => deleteProduct(index)}
                                     >
                                         Delete
                                     </button>
+
                                 </td>
                             </tr>
                         ))}

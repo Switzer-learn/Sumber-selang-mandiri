@@ -5,7 +5,8 @@ import Transaction from "../Layout/Transaction";
 import ProductListnStock from "../Layout/ProductListnStock";
 import CustomerList from "../Layout/CustomerList";
 import RevenueReport from "../Layout/RevenueReport";
-import EmployeeRegister from "../Layout/addEmployee"
+import EmployeeRegister from "../Layout/AddEmployee";
+import ProductPurchase from "../Layout/ProductPurchase";
 import { useNavigate } from 'react-router-dom'
 import { api } from "../../service/api"
 
@@ -36,7 +37,7 @@ const AdminPage: React.FC = () => {
       }
     }
     checkUser();
-  },[])
+  },[navigate])
   
   const handleSideMenuClick = (menu: string) => {
     setSelectedMenu(menu);
@@ -46,6 +47,10 @@ const AdminPage: React.FC = () => {
     switch (selectedMenu) {
       case "addInventory":
         return <AddInventoryForm />;
+      case "addInventoryPurchase":
+        return <ProductPurchase />;
+      case "purchaseList":
+        return <div>History pembelian</div>;
       case "inventoryList":
         return <ProductListnStock />;
       case "RevenueReport":

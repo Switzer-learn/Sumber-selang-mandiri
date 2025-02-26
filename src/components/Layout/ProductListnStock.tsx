@@ -1,13 +1,26 @@
-import { products } from "../../data/dummyProduct.json";
 import { useEffect, useState } from "react";
-import { Product } from "../interface/ProductInterface";
+import { dbProducts } from "../interface/dbInterfaces";
 import { formatPrice } from "../../function.tsx/function";
+import { api } from "../../service/api"
 
 const ProductListnStock = () => {
-    const [productData, setProductData] = useState<Product[]>([]);
+    const [productData, setProductData] = useState<dbProducts[]>([]);
 
     useEffect(() => {
-        setProductData(products);
+        const fetchProducts = async() =>{
+            const fetchProductsResponse = await api.fetchProducts();
+            if(fetchProductsResponse){
+                if(fetchProductsResponse.status===200){
+                    setProductData(fetchProductsResponse.data);
+                }else{
+                    alert(fetchProductsResponse.message);
+                    console.log(fetchProductsResponse);
+                }
+            }else{
+                return;
+            }
+        }
+        fetchProducts();
     }, []);
 
     const editProduct = (index: number) => {
@@ -30,7 +43,7 @@ const ProductListnStock = () => {
                             <th className="py-3 px-6 text-left">Nama</th>
                             <th className="py-3 px-6 text-left">Stock</th>
                             <th className="py-3 px-6 text-left">Harga</th>
-                            <th className="py-3 px-6 text-left">Tipe</th>
+                            <th className="py-3 px-6 text-left">Update terakhir</th>
                             <th className="py-3 px-6 text-left">Action</th>
                         </tr>
                     </thead>
@@ -40,8 +53,8 @@ const ProductListnStock = () => {
                                 <td className="py-3 px-6 text-left">{index + 1}</td>
                                 <td className="py-3 px-6 text-left">{product.name}</td>
                                 <td className="py-3 px-6 text-left">{product.stock}</td>
-                                <td className="py-3 px-6 text-left">Rp.{formatPrice(product.price)},-</td>
-                                <td className="py-3 px-6 text-left">{product.type}</td>
+                                <td className="py-3 px-6 text-left">Rp.{formatPrice(product.sell_price)},-</td>
+                                <td className="py-3 px-6 text-left">{product.last_updated?.slice(0,10)}</td>
                                 <td className="py-3 px-6 text-left space-y-2 md:space-x-2 md:space-y-0">
                                 <button 
                                         className="bg-green-500 text-white px-3 py-1 rounded hover:bg-red-600"

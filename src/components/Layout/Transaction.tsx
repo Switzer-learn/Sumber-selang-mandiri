@@ -3,36 +3,54 @@ import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 import TransactionTable from "../UI/TransactionTable";
 import { currentDate } from "../../function.tsx/function";
+import { api } from "../../service/api";
 
-interface SelectedProduct{
-    name: string;
-    amount: number;
-    price: number;
-    product_id: number;
+interface onFetchProductInterface{
+    name:string,
+    amount:number,
+    price:number,
+    product_id:string
 }
 
 interface CustomerData{
-    customer_id: string;
-    customer_name: string;
-    customer_phone_number: number;
-    customer_address: string;
-    hutang_customer: number;
+    id: string;
+    name: string;
+    phone_number: number;
+    address: string;
+    cash_bon: number;
 }
 
 const Transaction = () =>{
     const [customerName,setCustomerName] = useState<string>("");
     const [customerData,setCustomerData] = useState<CustomerData[]>([]);
     const [customerId,setCustomerId] = useState<string>("");
-    const [cashierName,setCashierName] = useState<string>("");
+    const [cashierId,setCashierId] = useState<string>("");
     const [customerPhoneNumber,setCustomerPhoneNumber] = useState<number>(0);
     const [customerAddress,setCustomerAddress] = useState<string>("");
     const [hutangCustomer,setHutangCustomer] = useState<number>(0);
-    const [productData,setProductData] = useState<SelectedProduct[]>([]);
+    const [productData,setProductData] = useState<onFetchProductInterface[]>([]);
     const [grandTotal,setGrandTotal] = useState<number>(0);
     const [metodePembayaran,setMetodePembayaran] = useState<string>("Cash");
 
     useEffect(()=>{
-        setCashierName("");
+        const fetchCurrentUser = async()=>{
+            const fetchUserResponse = await api.getCurrentUser();
+            if(fetchUserResponse){
+                setCashierId(fetchUserResponse.id)
+            }
+        }
+        const fetchCustomer = async()=>{
+            const fetchCustomerResponse = await api.fetchCustomer();
+            if(fetchCustomerResponse){
+                if(fetchCustomerResponse.status===200){
+                    if (fetchCustomerResponse.data) {
+                      setCustomerData(fetchCustomerResponse.data as CustomerData[]);
+                    }
+                }
+            }
+        }
+        fetchCurrentUser();
+        fetchCustomer();
     },[])
 
     useEffect(()=>{
@@ -42,12 +60,14 @@ const Transaction = () =>{
     const handleSubmit =(e:React.FormEvent)=>{
         e.preventDefault();
         const formData = {
-            customer_id:customerId,
-            cashier_name:cashierName,
-            customer_name:customerName,
-            customer_phone_number:customerPhoneNumber,
-            customer_address:customerAddress,
-            hutang_customer:hutangCustomer,
+            customer:{
+                customer_id:customerId,
+                name:customerName,
+                phone_number:customerPhoneNumber,
+                address:customerAddress,
+                cash_bon:hutangCustomer,
+            },
+            cashier_id:cashierId,
             product_data:productData,
             grand_total:grandTotal,
             metode_pembayaran:metodePembayaran,
@@ -57,9 +77,7 @@ const Transaction = () =>{
         console.log(formData);
     }
 
-    
-
-    const fetchProduct = (data:SelectedProduct[],grandTotal:number) =>{
+    const fetchProduct = (data:onFetchProductInterface[],grandTotal:number) =>{
         console.log(data,grandTotal);
         setGrandTotal(grandTotal);
         setProductData(data);
@@ -90,7 +108,7 @@ const Transaction = () =>{
                         id="customerName"
                         freeSolo
                         value={customerName}
-                        options={customerData.map((option) => option.customer_name)}
+                        options={customerData.map((option) => option.name)}
                         onInputChange={(_event, newValue) => setCustomerName(newValue)}
                         renderInput={(params) => (
                         <TextField {...params} label="Nama Pelanggan" required />

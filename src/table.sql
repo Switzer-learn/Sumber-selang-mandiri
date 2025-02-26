@@ -21,9 +21,10 @@ CREATE TABLE users (
 -- 3. Create Products Table (Updated)
 CREATE TABLE products (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     type TEXT CHECK (type IN ('goods', 'service')) NOT NULL,
     description TEXT,
+    unit TEXT, --satuan
     stock INTEGER, -- Only applies to 'goods'; NULL for 'service'
     avg_buy_price NUMERIC, -- Average buying price (for reporting)
     sell_price NUMERIC NOT NULL, -- Current selling price
@@ -75,30 +76,98 @@ CREATE TABLE transaction_items (
 
 
 -- Set row-level security for each table
-CREATE POLICY select_users ON users FOR SELECT TO authenticated USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY insert_users ON users FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_users ON users FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_users ON users FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+-- ✅ Allow only authenticated users to read their own data
+CREATE POLICY select_users ON users
+FOR SELECT TO authenticated
+USING (id = auth.uid());
 
-CREATE POLICY select_products ON products FOR SELECT TO authenticated;
-CREATE POLICY insert_products ON products FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_products ON products FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_products ON products FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+-- ✅ Allow only admins to see all users
+CREATE POLICY select_all_users ON users
+FOR SELECT TO authenticated
+USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
 
-CREATE POLICY select_customers ON customers FOR SELECT TO authenticated;
-CREATE POLICY insert_customers ON customers FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_customers ON customers FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_customers ON customers FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+-- ✅ Allow only admins to insert users
+CREATE POLICY insert_users ON users
+FOR INSERT WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
 
-CREATE POLICY select_transactions ON transactions FOR SELECT TO authenticated;
-CREATE POLICY insert_transactions ON transactions FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_transactions ON transactions FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_transactions ON transactions FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+-- ✅ Allow only admins to update users
+CREATE POLICY update_users ON users
+FOR UPDATE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
 
-CREATE POLICY select_transaction_items ON transaction_items FOR SELECT TO authenticated;
-CREATE POLICY insert_transaction_items ON transaction_items FOR INSERT WITH CHECK (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY update_transaction_items ON transaction_items FOR UPDATE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
-CREATE POLICY delete_transaction_items ON transaction_items FOR DELETE USING (id = (SELECT id FROM auth.users WHERE id = auth.uid()));
+-- ✅ Allow only admins to delete users
+CREATE POLICY delete_users ON users
+FOR DELETE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+-- ✅ Allow only admins to access the products table
+CREATE POLICY select_products ON products
+FOR SELECT TO authenticated
+USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY insert_products ON products
+FOR INSERT WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY update_products ON products
+FOR UPDATE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY delete_products ON products
+FOR DELETE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+-- ✅ Allow only admins to access the customers table
+CREATE POLICY select_customers ON customers
+FOR SELECT TO authenticated
+USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY insert_customers ON customers
+FOR INSERT WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY update_customers ON customers
+FOR UPDATE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY delete_customers ON customers
+FOR DELETE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+-- ✅ Allow only admins to access transactions
+CREATE POLICY select_transactions ON transactions
+FOR SELECT TO authenticated
+USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY insert_transactions ON transactions
+FOR INSERT WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY update_transactions ON transactions
+FOR UPDATE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY delete_transactions ON transactions
+FOR DELETE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+-- ✅ Allow only admins to access transaction items
+CREATE POLICY select_transaction_items ON transaction_items
+FOR SELECT TO authenticated
+USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY insert_transaction_items ON transaction_items
+FOR INSERT WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY update_transaction_items ON transaction_items
+FOR UPDATE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY delete_transaction_items ON transaction_items
+FOR DELETE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+-- ✅ Allow only admins to access product purchases
+CREATE POLICY select_product_purchases ON product_purchases
+FOR SELECT TO authenticated
+USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY insert_product_purchases ON product_purchases
+FOR INSERT WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY update_product_purchases ON product_purchases
+FOR UPDATE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
+CREATE POLICY delete_product_purchases ON product_purchases
+FOR DELETE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
+
 
 
 

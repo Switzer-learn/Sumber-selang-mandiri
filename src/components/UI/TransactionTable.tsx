@@ -1,24 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { formatPrice } from "../../function.tsx/function";
 import { Autocomplete, TextField } from "@mui/material";
-import { Product } from "../interface/ProductInterface";
-import {products} from "../../data/dummyProduct.json";
 import { SelectedProduct } from "../interface/SelectedProductInterface";
-
+import { api } from "../../service/api"
+import { dbProducts } from "../interface/dbInterfaces";
 interface TransactionTableProps {
   onFetchProduct: (
-    products: { name: string; amount: number; price: number; product_id: number }[],
+    products: { name: string; amount: number; price: number; product_id: string }[],
     grandTotal: number
   ) => void;
 }
 
 const TransactionTable: React.FC<TransactionTableProps> = ({ onFetchProduct }) => {
-  const [originalProducts, setOriginalProducts] = useState<Product[]>([]);
+  const [originalProducts, setOriginalProducts] = useState<dbProducts[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(() => {
-    setOriginalProducts( products );
+        const fetchProducts = async()=>{
+           const fetchProductsResponse = await api.fetchProducts();
+           console.log(fetchProductsResponse?.data);
+           if(fetchProductsResponse){
+               if(fetchProductsResponse.status===200){
+                   setOriginalProducts(fetchProductsResponse.data);
+               }else{
+                   alert("check console");
+                   console.log(fetchProductsResponse.message);
+               }
+           }else{
+               alert("failed to fetch product");
+           }
+       }
+      fetchProducts();
   }, []);
 
   useEffect(() => {
@@ -35,10 +48,10 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onFetchProduct }) =
           ? {
               ...item,
               name: product?.name || "",
-              price: product?.price || 0,
+              price: product?.sell_price || 0,
               stock: product?.stock || 0,
-              product_id: product?.product_id || 0,
-              subtotal: item.amount * (product?.price || 0),
+              product_id: product?.id || "",
+              subtotal: item.amount * (product?.sell_price || 0),
             }
           : item
       )
@@ -46,7 +59,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onFetchProduct }) =
   };
 
   const handleAddProduct = () => {
-    setSelectedProducts([...selectedProducts, { name: "", amount: 0, price: 0, product_id: 0, subtotal: 0, stock: 0 }]);
+    setSelectedProducts([...selectedProducts, { name: "", amount: 0, price: 0, product_id: '', subtotal: 0, stock: 0 }]);
   };
 
   const handleAmountChange = (index: number, value: number) => {

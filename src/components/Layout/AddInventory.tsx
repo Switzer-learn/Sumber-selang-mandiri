@@ -1,16 +1,37 @@
-import * as React from "react";
+import {useEffect,useState} from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-import { Product } from "../interface/ProductInterface";
+import { dbProducts } from "../interface/dbInterfaces";
+import { api } from "../../service/api";
 
 const AddInventoryForm: React.FC = () => {
-  const [jumlah, setJumlah] = React.useState<number | null>(0);
-  const [satuan, setSatuan] = React.useState<string>("pcs");
-  const [keterangan, setKeterangan] = React.useState<string>("");
-  const [harga, setHarga] = React.useState<number | null>(0);
-  const [inventoryName, setInventoryName] = React.useState<string>("");
-  const [inventoryData, setInventoryData] = React.useState<Product[]>([]);
-  const [jenis,setJenis] = React.useState<string>("Barang");
+  const [jumlah, setJumlah] = useState<number | null>(0);
+  const [satuan, setSatuan] = useState<string>("pcs");
+  const [keterangan, setKeterangan] = useState<string>("");
+  const [hargaJual, setHargaJual] = useState<number>(0);
+  const [inventoryName, setInventoryName] = useState<string>("");
+  const [inventoryData, setInventoryData] = useState<dbProducts[]>([]);
+  const [jenis,setJenis] = useState<string>("goods");
+
+
+  useEffect(()=>{
+    const fetchProducts = async() =>{
+        const fetchProductsResponse = await api.fetchProducts();
+        const getUser = await api.getCurrentUser();
+        console.log(getUser);
+        if(fetchProductsResponse){
+            if(fetchProductsResponse.status===200){
+                setInventoryData(fetchProductsResponse.data);
+            }else{
+                alert(fetchProductsResponse.message);
+                console.log(fetchProductsResponse);
+            }
+        }else{
+            return;
+        }
+    }
+    fetchProducts();
+  },[])
 
   // Reset form fields
   const resetForm = () => {
@@ -18,19 +39,31 @@ const AddInventoryForm: React.FC = () => {
     setJumlah(0);
     setSatuan("pcs");
     setKeterangan("");
-    setHarga(0);
+    setHargaJual(0);
   };
 
   const handleSubmit = async (_event: React.FormEvent) => {
     _event.preventDefault();
     const formData = {
-      inventoryName,
-      jumlah,
-      satuan,
-      keterangan,
-      harga,
+      name:inventoryName,
+      type:jenis,
+      unit:satuan,
+      description:keterangan,
+      sell_price:hargaJual,
+      stock:0,
+      avg_buy_price:0
     };
-    console.log(formData)
+    console.log(formData.type)
+    confirm("Apakah data sudah benar?");
+    const addProductResponse = await api.addProduct(formData);
+    if(addProductResponse){
+      if(addProductResponse.status===200){
+        alert(addProductResponse.message)
+      }else{
+        alert(addProductResponse.message);
+        console.log(addProductResponse);
+      }
+    }
   };
 
   return (
@@ -84,21 +117,21 @@ const AddInventoryForm: React.FC = () => {
             className="border rounded p-2"
           >
             <option value="pcs">Pcs</option>
-            <option value="kg">Meter</option>
-            <option value="ml">Ml</option>
+            <option value="meter">Meter</option>
+            <option value="box">Box</option>
           </select>
         </div>
 
         {/* Harga */}
         <div className="flex flex-col gap-2">
           <label htmlFor="harga" className="font-medium">
-            Harga:
+            Harga Jual:
           </label>
           <TextField
-            id="harga"
+            id="sell_price"
             type="number"
-            value={harga ?? ""}
-            onChange={(e) => setHarga(e.target.value ? parseInt(e.target.value) : null)}
+            value={hargaJual ?? ""}
+            onChange={(e) => setHargaJual(parseInt(e.target.value))}
             label="Harga"
             required
           />
@@ -115,8 +148,8 @@ const AddInventoryForm: React.FC = () => {
             onChange={(e) => setJenis(e.target.value)}
             className="border rounded p-2"
           >
-            <option value="pcs">Barang</option>
-            <option value="kg">Jasa</option>
+            <option value="goods">Barang</option>
+            <option value="service">Jasa</option>
           </select>
         </div>
 

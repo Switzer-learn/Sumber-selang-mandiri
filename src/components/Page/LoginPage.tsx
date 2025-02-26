@@ -18,7 +18,7 @@ const LoginPage = () => {
       }
     }
     checkUser();
-  },[])
+  },[navigate])
 
   // Handle login form submission.
   const handleSubmit = async (e: React.FormEvent) => {

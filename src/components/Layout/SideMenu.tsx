@@ -52,7 +52,7 @@ const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
                 className="w-full text-left py-2 px-4 hover:bg-green-700"
                 onClick={() => setInventoryOpen(!inventoryOpen)}
               >
-                Persediaan
+                Produk
               </button>
               {inventoryOpen && (
                 <ul className="px-4 text-md font-normal flex flex-col">
@@ -64,10 +64,23 @@ const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
                   </button>
                   <button
                     className="hover:text-lg text-start py-1 px-2"
+                    onClick={() => onMenuClick("addInventoryPurchase")}
+                  >
+                    Pembelian Produk
+                  </button>
+                  <button
+                    className="hover:text-lg text-start py-1 px-2"
                     onClick={() => onMenuClick("inventoryList")}
                   >
                     List Produk & Stock
                   </button>
+                  <button
+                    className="hover:text-lg text-start py-1 px-2"
+                    onClick={() => onMenuClick("purchaseList")}
+                  >
+                    History Pembelian
+                  </button>
+
                 </ul>
               )}
             </div>

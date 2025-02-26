@@ -1,4 +1,4 @@
-import { dbCustomers,dbProducts,dbProductsPurchases,dbTransactions,dbTransactionsItems,dbUsers } from "../components/interface/dbInterfaces";
+import { dbCustomers,dbProducts,dbProductsPurchases,dbTransactions,dbTransactionsItems,dbUpdateProductPricenStock,dbUsers } from "../components/interface/dbInterfaces";
 import supabase from "../util/supabase";
 
 interface credentials {
@@ -7,26 +7,83 @@ interface credentials {
 }
 
 export const api = {
-    addProduct: async (data: dbProducts) => {
-        try {
-            console.log(data);
-            
-        } catch (error) {
-            console.error(error);
-        }
-    },
+  addProduct: async (input: dbProducts) => {
+      try {  
+          // Insert product with the authenticated user's ID
+          const { error: insertError } = await supabase.from("products").insert({
+              name: input.name,
+              type: input.type,
+              unit: input.unit,
+              description: input.description,
+              sell_price: input.sell_price,
+          })
+  
+          if (insertError) {
+              return { status: 500, message: insertError };
+          }
+  
+          return { status: 200, message: "Tambah Produk Berhasil" };
+      } catch (err) {
+          console.error(err);
+          return { status: 500, message: err };
+      }
+  },
 
-    addProductPurchases : async(data:dbProductsPurchases) => {
+  updateProductPricenStock: async (input: dbUpdateProductPricenStock) => {
+      try {
+        console.log(input);
+          const { error } = await supabase.from("products").update({
+              avg_buy_price: input.avg_buy_price,
+              stock: input.stock
+          }).eq("id", input.id);
+  
+          if (error) {
+              return { status: 500, message: error };
+          }
+  
+          return { status: 200, message: "Update Produk Berhasil" };
+      } catch (err) {
+          console.error(err);
+          return { status: 500, message: err };
+      }
+  },
+  
+
+    addProductPurchases : async(input:dbProductsPurchases) => {
+      const user = supabase.auth.getUser();
+      console.log(user);
+      const {product_id,quantity_purchased,buying_price} = input
         try {
-            console.log(data);
+            console.log(input);
+            const {data,error} = await supabase
+              .from("product_purchases")
+              .insert([{
+                product_id:product_id,
+                quantity_purchased:quantity_purchased,
+                buying_price:buying_price
+              }])
+              .select()
+            if(error){
+              return {status:500, message:error,data:[]}
+            }
+            return {status:200,data:data,message:"success"}
         } catch (error) {
             console.error(error);
+            return {status:500, message:error,data:[]};
         }
     },
 
     fetchProducts: async () => {
         try {
-            console.log("fetchProducts");
+            const {data,error} = await supabase
+              .from("products")
+              .select("*")
+              .order("name", { ascending: true });
+
+            if(error){
+              return {status:500, message:error,data:[]}
+            }
+            return {status:200,data:data,message:"success"};
         } catch (error) {
             console.error(error);
         }
@@ -50,7 +107,13 @@ export const api = {
 
     fetchTransaction : async() =>{
         try {
-            console.log("fetch Transaction")
+            const {data,error} = await supabase
+              .rpc("get_transaction_details")
+
+            if(error){
+              return {status:500,message:error}
+            }
+            return {status:200,data:data};
         } catch (error) {
             console.error(error);
         }
@@ -66,7 +129,15 @@ export const api = {
 
     fetchCustomer : async() => {
         try {
-            console.log("fetchCustomer");
+            const {data,error} = await supabase
+              .from("customers")
+              .select("*")
+              .order("name",{ascending:true});
+
+            if(error){
+              return {status:500,message:error};
+            }
+            return {status:200,data:data};
         } catch (error) {
             console.error(error);
         }

@@ -1,19 +1,26 @@
 export interface dbProducts {
-    id: string;
+    id?: string;
     name: string;
     type: string;
+    unit: string;
     description: string;
-    stock: number;
-    avg_buy_price: number;
+    stock: number | 0;
+    avg_buy_price: number | 0;
     sell_price:number;    
     created_at?: string;
     last_updated?: string;
 }
 
-export interface dbProductsPurchases {
+export interface dbUpdateProductPricenStock{
     id: string;
+    avg_buy_price: number;
+    stock: number;
+}
+
+export interface dbProductsPurchases {
+    id?: string;
     product_id: string;
-    purchase_date: string;
+    purchase_date?: string;
     buying_price: number;
     quantity_purchased: number;
 }

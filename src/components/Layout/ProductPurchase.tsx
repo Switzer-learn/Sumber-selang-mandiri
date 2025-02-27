@@ -131,18 +131,11 @@ const ProductPurchase: React.FC = () => {
       return await api.addProductPurchases(item);
     });
   
-    const updateProductPromise = selectedProducts.map(async (item) => {
-      console.log("Old avg_price:", item.avg_price);
-      console.log("Old stock:", item.current_stock);
-      console.log("New buying_price:", item.buying_price);
-      console.log("New quantity_purchased:", item.quantity_purchased);
-  
+    const updateProductPromise = selectedProducts.map(async (item) => {  
       const newStock = item.current_stock + item.quantity_purchased;
       const totalOldCost = item.current_stock * item.avg_price;
       const totalNewCost = item.quantity_purchased * item.buying_price;
-      console.log(totalNewCost);
       const newAvgPrice = Math.floor((totalOldCost + totalNewCost) / newStock);
-      console.log(newAvgPrice);
   
       return await api.updateProductPricenStock({
         id: item.product_id,

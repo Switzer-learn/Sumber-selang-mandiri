@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { transactions } from "../../data/dummyTransaction.json";
 import { formatPrice } from "../../function.tsx/function";
+import { api } from "../../service/api";
 
 interface Transaction {
-    transaction_id: number;
+    transaction_id: string;
     date: string;
     customer: {
       name: string;
@@ -13,7 +13,7 @@ interface Transaction {
     payment_type: string;
     grandtotal: number;
     products: {
-      product_id: number;
+      product_id: string;
       name: string;
       quantity: number;
       unit_price: number;
@@ -28,30 +28,74 @@ const RevenueReport = () => {
     const [month, setMonth] = useState("");
     const [year, setYear] = useState("");
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function groupTransactions(data: any[]): Transaction[] {
+        const transactionsMap = new Map<string, Transaction>();
+      
+        data.forEach((item) => {
+          if (!transactionsMap.has(item.transaction_id)) {
+            transactionsMap.set(item.transaction_id, {
+              transaction_id: item.transaction_id,
+              date: item.created_at,
+              customer: {
+                name: item.customer_name,
+                id: 0, // Replace with actual customer ID if available
+                hutang: item.customer_hutang,
+              },
+              payment_type: item.transaction_payment_type,
+              grandtotal: item.transaction_grand_total,
+              products: [],
+            });
+          }
+      
+          const transaction = transactionsMap.get(item.transaction_id)!;
+          transaction.products.push({
+            product_id: item.product_id || "", // Replace if product_id is available
+            name: item.product_name,
+            quantity: item.product_quantity,
+            unit_price: item.product_price,
+          });
+        });
+      
+        return Array.from(transactionsMap.values());
+      }
 
     useEffect(() => {
-        setTransactionData(transactions);
-        setOriginalTransaction(transactions);
+        const fetchTransactions = async () => {
+            const fetchTransactionsResponse = await api.fetchTransaction();
+            if(fetchTransactionsResponse){
+                console.log(groupTransactions(fetchTransactionsResponse.data))
+                if(fetchTransactionsResponse.status===200){
+                    setTransactionData(groupTransactions(fetchTransactionsResponse.data));
+                    setOriginalTransaction(groupTransactions(fetchTransactionsResponse.data));
+                }
+                else{
+                    console.log(fetchTransactionsResponse)
+                    console.log(fetchTransactionsResponse.message)
+                }
+            }
+        }
+        fetchTransactions();
     }, []);
 
     const handleDateChange = (date: string) => {
         setDate(date);
         // Filter transactions based on the selected date
-        const filteredTransactions = transactions.filter((transaction) => transaction.date === date);
+        const filteredTransactions = originalTransaction.filter((transaction) => transaction.date === date);
         setTransactionData(filteredTransactions);
     };
 
     const handleMonthChange = (month: string) => {
         setMonth(month);
         // Filter transactions based on the selected month
-        const filteredTransactions = transactions.filter((transaction) => transaction.date.startsWith(month));
+        const filteredTransactions = originalTransaction.filter((transaction) => transaction.date.startsWith(month));
         setTransactionData(filteredTransactions);
     };
 
     const handleYearChange = (year: string) => {
         setYear(year);
         // Filter transactions based on the selected year
-        const filteredTransactions = transactions.filter((transaction) => transaction.date.startsWith(year));
+        const filteredTransactions = originalTransaction.filter((transaction) => transaction.date.startsWith(year));
         setTransactionData(filteredTransactions);
     };
 
@@ -136,7 +180,7 @@ const RevenueReport = () => {
                         {transactionData.map((transaction) => (
                             <tr key={transaction.transaction_id} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="py-3 px-6 text-left">{transaction.transaction_id}</td>
-                                <td className="py-3 px-6 text-left">{transaction.date}</td>
+                                <td className="py-3 px-6 text-left">{transaction.date.slice(0, 10)}</td>
                                 <td className="py-3 px-6 text-left">{transaction.customer.name}</td>
                                 <td className="py-3 px-6 text-left">{transaction.payment_type}</td>
                                 <td className="py-3 px-6 text-left">Rp.{formatPrice(transaction.grandtotal)},-</td>

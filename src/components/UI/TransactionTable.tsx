@@ -4,6 +4,8 @@ import { Autocomplete, TextField } from "@mui/material";
 import { SelectedProduct } from "../interface/SelectedProductInterface";
 import { api } from "../../service/api"
 import { dbProducts } from "../interface/dbInterfaces";
+import supabase  from "../../util/supabase";
+import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 interface TransactionTableProps {
   onFetchProduct: (
     products: { name: string; amount: number; price: number; product_id: string }[],
@@ -15,30 +17,66 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onFetchProduct }) =
   const [originalProducts, setOriginalProducts] = useState<dbProducts[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-        const fetchProducts = async()=>{
-           const fetchProductsResponse = await api.fetchProducts();
-           console.log(fetchProductsResponse?.data);
-           if(fetchProductsResponse){
-               if(fetchProductsResponse.status===200){
-                   setOriginalProducts(fetchProductsResponse.data);
-               }else{
-                   alert("check console");
-                   console.log(fetchProductsResponse.message);
-               }
-           }else{
-               alert("failed to fetch product");
-           }
-       }
-      fetchProducts();
-  }, []);
+    const fetchProducts = async () => {
+      setLoading(true);
+      const fetchProductsResponse = await api.fetchProducts();
+      if (fetchProductsResponse && fetchProductsResponse.status === 200) {
+        setOriginalProducts(fetchProductsResponse.data);
+      } else {
+        alert("Failed to fetch products");
+        console.log(fetchProductsResponse?.message);
+      }
+      setLoading(false);
+    };
+  
+    fetchProducts(); // Ensure products are loaded initially
+  
+    // Subscribe to stock changes
+    const productsSubscription = supabase
+      .channel("products_changes")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "products", filter: "stock=neq.null" },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: RealtimePostgresChangesPayload<any>) => {
+          console.log("Stock Updated:", payload);
+  
+          setOriginalProducts((prev) =>
+            prev.map((item) => (item.id === payload.new.id ? { ...item, stock: payload.new.stock } : item))
+          );
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      supabase.removeChannel(productsSubscription);
+    };
+  }, []);  
 
   useEffect(() => {
     const newTotal = selectedProducts.reduce((acc, curr) => acc + curr.subtotal, 0);
     setTotalAmount(newTotal);
     onFetchProduct(selectedProducts, newTotal);
   }, [onFetchProduct, selectedProducts]);
+
+  // Update selected products when originalProducts changes
+  useEffect(() => {
+    setSelectedProducts(prevSelected =>
+      prevSelected.map(selected => {
+        const updatedProduct = originalProducts.find(p => p.id === selected.product_id);
+        return updatedProduct
+          ? {
+              ...selected,
+              stock: updatedProduct.stock,
+              price: updatedProduct.sell_price
+            }
+          : selected;
+      })
+    );
+  }, [originalProducts]);
 
   const handleProductChange = (index: number, value: string) => {
     const product = originalProducts.find((p) => p.name === value);
@@ -73,6 +111,14 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onFetchProduct }) =
   const handleRemoveProduct = (index: number) => {
     setSelectedProducts((prev) => prev.filter((_, i) => i !== index));
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 max-h-96 overflow-y-auto shadow-lg rounded-lg">

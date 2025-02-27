@@ -5,10 +5,11 @@ import Transaction from "../Layout/Transaction";
 import ProductListnStock from "../Layout/ProductListnStock";
 import CustomerList from "../Layout/CustomerList";
 import RevenueReport from "../Layout/RevenueReport";
-import EmployeeRegister from "../Layout/AddEmployee";
+//import EmployeeRegister from "../Layout/AddEmployee";
 import ProductPurchase from "../Layout/ProductPurchase";
 import { useNavigate } from 'react-router-dom'
 import { api } from "../../service/api"
+import PurchaseHistory from "../Layout/PurchaseHistory";
 
 const AdminPage: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState("");
@@ -50,7 +51,7 @@ const AdminPage: React.FC = () => {
       case "addInventoryPurchase":
         return <ProductPurchase />;
       case "purchaseList":
-        return <div>History pembelian</div>;
+        return <PurchaseHistory />;
       case "inventoryList":
         return <ProductListnStock />;
       case "RevenueReport":
@@ -62,7 +63,7 @@ const AdminPage: React.FC = () => {
       case "testing":
         return <ProductListnStock />;
       default:
-        return <EmployeeRegister />;
+        return <Transaction />;
     }
   };
 

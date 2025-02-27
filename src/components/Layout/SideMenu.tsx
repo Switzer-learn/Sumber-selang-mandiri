@@ -89,7 +89,7 @@ const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
                 className="w-full text-left py-2 px-4 hover:bg-green-700"
                 onClick={() => onMenuClick("RevenueReport")}
               >
-                Keuangan
+                Laporan Penjualan
               </button>
             </div>
             <div>
@@ -97,7 +97,7 @@ const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
                 className="w-full text-left py-2 px-4 hover:bg-green-700"
                 onClick={() => onMenuClick("cashier")}
               >
-                Pembayaran
+                Penjualan
               </button>
             </div>
             <div>

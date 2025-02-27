@@ -46,7 +46,7 @@ CREATE TABLE customers (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     address TEXT,
-    phone_number TEXT NOT NULL,
+    phone_number TEXT NOT NULL UNIQUE,
     cash_bon NUMERIC DEFAULT 0, -- Customer credit balance
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -178,21 +178,22 @@ ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transaction_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_purchases ENABLE ROW LEVEL SECURITY;
 
+DROP FUNCTION IF EXISTS get_transaction_details();
 
 CREATE OR REPLACE FUNCTION get_transaction_details()
 RETURNS TABLE (
-    transaction_id VARCHAR,
+    transaction_id UUID,
     transaction_grand_total NUMERIC,
-    transaction_cashier VARCHAR,
-    transaction_payment_type VARCHAR,
+    transaction_cashier TEXT,
+    transaction_payment_type TEXT,
 
-    product_name VARCHAR,
-    product_quantity NUMERIC,
+    product_name TEXT,
+    product_quantity INTEGER,
     product_price NUMERIC,
     product_discount NUMERIC,
 
-    customer_name VARCHAR,
-    customer_phone VARCHAR,
+    customer_name TEXT,
+    customer_phone TEXT,
     customer_hutang NUMERIC,
 
     created_at TIMESTAMPTZ
@@ -200,25 +201,52 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT 
-        ts.transaction_id,
+        ti.transaction_id,  -- Fixed incorrect alias usage
         t.grand_total,
-        t.cashier_id,
+        u.username AS transaction_cashier,  -- Use u.name instead of t.cashier_id
         t.payment_type,
 
-        ti.product_id,
+        p.name AS product_name,  -- Use p.name instead of ti.product_id
         ti.quantity,
-        ti.unit_price,
+        ti.unit_price AS product_price,
         ti.discount,
 
-        c.name,
-        c.phone_number,
-        c.hutang,
+        c.name AS customer_name,
+        c.phone_number AS customer_phone,
+        c.cash_bon AS customer_hutang,
 
         t.created_at
     FROM transaction_items ti
-    LEFT JOIN transactions t ON ts.transaction_id = t.id
+    LEFT JOIN transactions t ON ti.transaction_id = t.id  -- Fixed alias issue
     LEFT JOIN customers c ON t.customer_id = c.id
     LEFT JOIN users u ON t.cashier_id = u.id
     LEFT JOIN products p ON ti.product_id = p.id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+DROP FUNCTION IF exists get_purchase_details();
+
+CREATE OR REPLACE FUNCTION get_purchase_details()
+RETURNS TABLE (
+    purchase_id UUID, -- Changed from VARCHAR to UUID
+    purchase_quantity INTEGER,
+    buying_price NUMERIC,
+    purchase_date TIMESTAMPTZ,
+    product_name TEXT, -- Changed from VARCHAR to TEXT (matches `name` column type)
+    product_type TEXT -- Changed from VARCHAR to TEXT (matches `type` column type)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        pp.id,
+        pp.quantity_purchased,
+        pp.buying_price,
+        pp.purchase_date,
+        p.name,
+        p.type
+    FROM product_purchases pp
+    LEFT JOIN products p ON pp.product_id = p.id;
 END;
 $$ LANGUAGE plpgsql;

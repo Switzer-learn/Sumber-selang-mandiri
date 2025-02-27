@@ -1,9 +1,24 @@
-import { dbCustomers,dbProducts,dbProductsPurchases,dbTransactions,dbTransactionsItems,dbUpdateProductPricenStock,dbUsers } from "../components/interface/dbInterfaces";
+import { dbCustomers,dbProducts,dbProductsPurchases,dbUpdateProductPricenStock,dbUsers } from "../components/interface/dbInterfaces";
 import supabase from "../util/supabase";
 
 interface credentials {
     email:string;
     password:string;
+}
+
+interface TransactionInputData{
+  customer_id:string,
+  cashier_id:string,
+  grand_total:number,
+  metode_pembayaran:string,
+  date:string
+}
+
+interface TransactionItemsInputData{
+  transaction_id:string,
+  product_id:string,
+  amount:number,
+  price:number
 }
 
 export const api = {
@@ -73,6 +88,16 @@ export const api = {
         }
     },
 
+    fetchPurchaseHistory: async () => {
+      const{data,error} = await supabase.rpc('get_purchase_details');
+      if(error){
+        console.log(error)
+        return {status:500, message:error,data:[]}
+      }
+      console.log(data)
+      return {status:200,data:data,message:"success"}
+    },
+
     fetchProducts: async () => {
         try {
             const {data,error} = await supabase
@@ -88,18 +113,63 @@ export const api = {
             console.error(error);
         }
     },
-
-    addTransactions: async(data:dbTransactions) => {
+//new from deepseek
+    fetchSingleProduct: async (productId: string) => {
         try {
-            console.log(data)
+            const { data, error } = await supabase
+              .from("products")
+              .select("*")
+              .eq("id", productId)
+              .single();
+
+            if (error) {
+                return { status: 500, message: error, data: null };
+            }
+            return { status: 200, data: data, message: "success" };
+        } catch (error) {
+            console.error(error);
+            return { status: 500, message: error, data: null };
+        }
+    },
+
+    addTransactions: async(input:TransactionInputData) => {
+      const {customer_id,cashier_id,grand_total,metode_pembayaran} = input
+        try {
+            const { data, error } = await supabase
+              .from("transactions")
+              .insert({
+                customer_id: customer_id,
+                cashier_id: cashier_id,
+                payment_type: metode_pembayaran,
+                grand_total: grand_total
+              }).select();
+            if(error){
+              return {status:500, message:error,data:[]}
+            }
+            return {status:200,data:data,message:"success"}
         } catch (error) {
             console.error(error)
         }
     },
 
-    addTransactionItems: async(data:dbTransactionsItems) => {
+    addTransactionItems: async(input:TransactionItemsInputData) => {
+      const {transaction_id,amount,price,product_id} = input;
+      console.log(input)
         try {
-            console.log(data);
+            const { data, error } = await supabase
+              .from("transaction_items")
+              .insert([{
+                transaction_id:transaction_id,
+                product_id:product_id,
+                quantity:amount,
+                unit_price:price,
+                total_price:amount*price
+              }])
+              if(error){
+                return {status:500, message:error,data:[]}
+              }
+              return {status:200,data:data,message:"success"}
+
         } catch (error) {
             console.error(error);
         }
@@ -108,7 +178,7 @@ export const api = {
     fetchTransaction : async() =>{
         try {
             const {data,error} = await supabase
-              .rpc("get_transaction_details")
+              .rpc("get_transaction_details");
 
             if(error){
               return {status:500,message:error}
@@ -119,9 +189,25 @@ export const api = {
         }
     },
 
-    addCustomer : async(data:dbCustomers) => {
+    addCustomer : async(input:dbCustomers) => {
+      const {name,phone_number,address,cash_bon} = input
         try {
-            console.log(data);
+            const {data,error} = await supabase
+              .from("customers")
+              .upsert({
+                name:name,
+                phone_number:phone_number,
+                address:address,
+                cash_bon:cash_bon
+              },{
+                onConflict: "phone_number",
+              })
+              .select();
+
+            if(error){
+              return {status:500,message:error.message,data:[]}
+            }
+            return {status:200,message:"success",data:data}
         } catch (error) {
             console.error(error);
         }

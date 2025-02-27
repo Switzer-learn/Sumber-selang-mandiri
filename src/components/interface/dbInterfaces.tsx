@@ -47,11 +47,11 @@ export interface dbTransactionsItems {
 }
 
 export interface dbCustomers {
-    id: string;
+    id?: string;
     name: string;
-    phone_number: number;
+    phone_number: string;
     address: string;
-    cash_bon: number;
+    cash_bon?: number;
     created_at?: string;
 }
 

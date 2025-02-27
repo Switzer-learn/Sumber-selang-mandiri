@@ -15,7 +15,7 @@ interface onFetchProductInterface{
 interface CustomerData{
     id: string;
     name: string;
-    phone_number: number;
+    phone_number: string;
     address: string;
     cash_bon: number;
 }
@@ -25,7 +25,7 @@ const Transaction = () =>{
     const [customerData,setCustomerData] = useState<CustomerData[]>([]);
     const [customerId,setCustomerId] = useState<string>("");
     const [cashierId,setCashierId] = useState<string>("");
-    const [customerPhoneNumber,setCustomerPhoneNumber] = useState<number>(0);
+    const [customerPhoneNumber,setCustomerPhoneNumber] = useState<string>("");
     const [customerAddress,setCustomerAddress] = useState<string>("");
     const [hutangCustomer,setHutangCustomer] = useState<number>(0);
     const [productData,setProductData] = useState<onFetchProductInterface[]>([]);
@@ -53,32 +53,7 @@ const Transaction = () =>{
         fetchCustomer();
     },[])
 
-    useEffect(()=>{
-        setCustomerData([]);
-    },[customerName])
-
-    const handleSubmit =(e:React.FormEvent)=>{
-        e.preventDefault();
-        const formData = {
-            customer:{
-                customer_id:customerId,
-                name:customerName,
-                phone_number:customerPhoneNumber,
-                address:customerAddress,
-                cash_bon:hutangCustomer,
-            },
-            cashier_id:cashierId,
-            product_data:productData,
-            grand_total:grandTotal,
-            metode_pembayaran:metodePembayaran,
-            date:currentDate()
-        }
-        console.log("submit Pressed")
-        console.log(formData);
-    }
-
     const fetchProduct = (data:onFetchProductInterface[],grandTotal:number) =>{
-        console.log(data,grandTotal);
         setGrandTotal(grandTotal);
         setProductData(data);
     }
@@ -86,10 +61,111 @@ const Transaction = () =>{
     const resetForm = () =>{
         setCustomerName("");
         setCustomerAddress("");
-        setCustomerPhoneNumber(0);
+        setCustomerPhoneNumber("");
         setHutangCustomer(0);
         setCustomerId("");
     }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+    
+        if (!confirm("Apakah data sudah benar?")) {
+            return; // Stop execution if user cancels
+        }
+    
+        console.log("Submit Pressed");
+    
+        let finalCustomerId = customerId; 
+        if (metodePembayaran === "Bon") {
+            setHutangCustomer(prevHutang => prevHutang + grandTotal);
+        }
+    
+        if (!customerId) {
+            const addCustomerResponse = await api.addCustomer({
+                name: customerName,
+                phone_number: customerPhoneNumber,
+                address: customerAddress,
+                cash_bon:hutangCustomer
+            });
+    
+            if (addCustomerResponse?.status === 200 && addCustomerResponse.data.length > 0) {
+                finalCustomerId = addCustomerResponse.data[0].id;
+                setCustomerId(finalCustomerId); 
+            } else {
+                alert("Gagal menambahkan pelanggan.");
+                return;
+            }
+        }
+    
+        const transactionPayload = {
+            customer_id: finalCustomerId,
+            cashier_id: cashierId,
+            grand_total: grandTotal,
+            metode_pembayaran: metodePembayaran.toLowerCase(),
+            date: currentDate(),
+        };
+    
+        const addTransactionResponse = await api.addTransactions(transactionPayload);
+    
+        if (!addTransactionResponse || addTransactionResponse.status !== 200 || !addTransactionResponse.data.length) {
+            alert("Gagal menambahkan transaksi.");
+            console.error("Transaction error:", addTransactionResponse);
+            return;
+        }
+    
+        const transactionId = addTransactionResponse.data[0].id;
+        console.log("Transaction ID:", transactionId);
+    
+        const addTransactionItemsPromise = productData.map(async (item) => {
+            return api.addTransactionItems({
+                transaction_id: transactionId,
+                product_id: item.product_id,
+                amount: item.amount,
+                price: item.price
+            });
+        });
+    
+        const addTransactionItemsResponse = await Promise.all(addTransactionItemsPromise);
+        const hasErrors = addTransactionItemsResponse.some(res => !res || res.status !== 200);
+    
+        if (hasErrors) {
+            alert("Insert data pembelian produk gagal");
+            console.log("Transaction items error:", addTransactionItemsResponse);
+            return;
+        }
+    
+        const updateStockPromises = productData.map(async (item) => {
+            const productResponse = await api.fetchSingleProduct(item.product_id);
+    
+            if (productResponse?.status === 200 && productResponse.data) {
+                const currentStock = productResponse.data.stock || 0;
+                const newStock = currentStock - item.amount;
+    
+                return api.updateProductPricenStock({
+                    id: item.product_id,
+                    avg_buy_price: productResponse.data.avg_buy_price,
+                    stock: newStock
+                });
+            }
+            return null;
+        });
+    
+        const updateStockResponses = await Promise.all(updateStockPromises);
+        const hasStockErrors = updateStockResponses.some(res => !res || res.status !== 200);
+    
+        if (hasStockErrors) {
+            alert("Gagal memperbarui stok produk");
+            console.log("Stock update error:", updateStockResponses);
+            return;
+        }
+    
+        alert("Transaksi berhasil!");
+    
+        // Refresh page only on success
+        window.location.reload();
+    };
+    
+    
 
     return(
         <div id="addInventory" className="flex flex-col items-center p-4 max-h-screen overflow-y-auto">
@@ -109,9 +185,26 @@ const Transaction = () =>{
                         freeSolo
                         value={customerName}
                         options={customerData.map((option) => option.name)}
-                        onInputChange={(_event, newValue) => setCustomerName(newValue)}
+                        onInputChange={(_event, newValue) => {
+                            setCustomerName(newValue);
+
+                            // Find the selected customer
+                            const selectedCustomer = customerData.find((customer) => customer.name === newValue);
+                            if (selectedCustomer) {
+                                setCustomerId(selectedCustomer.id);
+                                setCustomerPhoneNumber(selectedCustomer.phone_number);
+                                setCustomerAddress(selectedCustomer.address);
+                                setHutangCustomer(selectedCustomer.cash_bon);
+                            } else {
+                                // Clear values if the name doesn't match any customer
+                                setCustomerId("");
+                                setCustomerPhoneNumber("");
+                                setCustomerAddress("");
+                                setHutangCustomer(0);
+                            }
+                        }}
                         renderInput={(params) => (
-                        <TextField {...params} label="Nama Pelanggan" required />
+                            <TextField {...params} label="Nama Pelanggan" required />
                         )}
                     />
                     </div>
@@ -125,7 +218,7 @@ const Transaction = () =>{
                             id="customerPhoneNumber"
                             type="number"
                             value={customerPhoneNumber ?? ""}
-                            onChange={(e) => setCustomerPhoneNumber(e.target.value ? parseInt(e.target.value) : 0)}
+                            onChange={(e) => setCustomerPhoneNumber(e.target.value ? e.target.value : "")}
                             label="Nomor Telepon"
                             required
                         />
@@ -142,21 +235,7 @@ const Transaction = () =>{
                         >{hutangCustomer}</span>
                     </div>
                 </div>
-                <div>
-                        {/* ID Customer */}
-                    <div className="flex flex-col gap-2">
-                    <label htmlFor="inventoryID" className="font-medium">
-                        ID Pelanggan: <span className="text-sm text-gray-500">(jika ingin memasukan data baru pastikan ID Pelanggan kosong)</span>
-                    </label>
-                    <input
-                        id="inventoryID"
-                        type="text"
-                        value={customerId}
-                        disabled
-                        className="px-3 py-4 border rounded"
-                    />
-                    </div>
-                    
+                <div>               
                     {/* Alamat */}
                     <div className="flex flex-col gap-2">
                     <label htmlFor="customerAddress" className="font-medium">

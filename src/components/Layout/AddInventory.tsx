@@ -17,8 +17,6 @@ const AddInventoryForm: React.FC = () => {
   useEffect(()=>{
     const fetchProducts = async() =>{
         const fetchProductsResponse = await api.fetchProducts();
-        const getUser = await api.getCurrentUser();
-        console.log(getUser);
         if(fetchProductsResponse){
             if(fetchProductsResponse.status===200){
                 setInventoryData(fetchProductsResponse.data);
@@ -101,7 +99,7 @@ const AddInventoryForm: React.FC = () => {
             value={jumlah ?? ""}
             onChange={(e) => setJumlah(e.target.value ? parseInt(e.target.value) : null)}
             label="Jumlah"
-            required
+            disabled
           />
         </div>
 

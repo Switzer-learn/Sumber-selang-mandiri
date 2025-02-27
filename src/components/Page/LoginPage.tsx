@@ -24,7 +24,7 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = { email, password };
-    console.log(formData);
+    //console.log(formData);
     const loginResponse = await api.login(formData);
     if(loginResponse){
       if(loginResponse.status===200){
@@ -45,8 +45,8 @@ const LoginPage = () => {
     <div className='text-white bg-gradient-to-br from-blue-500 to-purple-500 min-h-screen'>
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
-          <img src='./Sakura_Spa_Logo.png' className='mx-auto w-40 h-auto' alt='Logo' />
-          <h2 className="text-3xl font-extrabold text-center text-gray-800">Welcome Back</h2>
+          <span className="font-BonaNova text-3xl font-bold text-gray-800 py-5">Sumber Selang Mandiri</span>
+          <h2 className="text-xl font-extrabold text-center text-gray-800">Welcome Back</h2>
           <p className="text-gray-500 text-center">Sign in to your account</p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>

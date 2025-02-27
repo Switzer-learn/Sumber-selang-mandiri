@@ -21,7 +21,6 @@ const EmployeeRegister = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Submitted", formData);
     const registerResponse = await api.register({email:formData.email,password:formData.password});
     if(registerResponse.status===200){
         const userId = registerResponse.user?.id;
@@ -31,10 +30,11 @@ const EmployeeRegister = () => {
                 alert("Penambahan User Berhasil")
             } else {
                 alert(addEmployeeResponse.message);
-                console.log(addEmployeeResponse);
+                //console.log(addEmployeeResponse);
             }
         }else{
             alert("Something is wrong")
+            alert(addEmployeeResponse!.message);
         }
         
     }

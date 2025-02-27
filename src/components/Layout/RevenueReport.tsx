@@ -64,13 +64,13 @@ const RevenueReport = () => {
         const fetchTransactions = async () => {
             const fetchTransactionsResponse = await api.fetchTransaction();
             if(fetchTransactionsResponse){
-                console.log(groupTransactions(fetchTransactionsResponse.data))
+                //console.log(groupTransactions(fetchTransactionsResponse.data))
                 if(fetchTransactionsResponse.status===200){
                     setTransactionData(groupTransactions(fetchTransactionsResponse.data));
                     setOriginalTransaction(groupTransactions(fetchTransactionsResponse.data));
                 }
                 else{
-                    console.log(fetchTransactionsResponse)
+                    alert(fetchTransactionsResponse.message);
                     console.log(fetchTransactionsResponse.message)
                 }
             }

@@ -5,7 +5,7 @@ import Transaction from "../Layout/Transaction";
 import ProductListnStock from "../Layout/ProductListnStock";
 import CustomerList from "../Layout/CustomerList";
 import RevenueReport from "../Layout/RevenueReport";
-//import EmployeeRegister from "../Layout/AddEmployee";
+import EmployeeRegister from "../Layout/AddEmployee";
 import ProductPurchase from "../Layout/ProductPurchase";
 import { useNavigate } from 'react-router-dom'
 import { api } from "../../service/api"
@@ -13,28 +13,25 @@ import PurchaseHistory from "../Layout/PurchaseHistory";
 
 const AdminPage: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState("");
+  const [userRole,setUserRole] = useState("")
   const navigate = useNavigate();
 
   useEffect(()=>{
     const checkUser = async() =>{
       const currentUser = await api.getCurrentUser();
-      console.log(currentUser)
+      //console.log(currentUser)
       if(currentUser){
         const checkRole = await api.checkRole(currentUser.id);
-        if (checkRole.role){
-          console.log(checkRole.role[0])
-          if(checkRole.role[0].role==="admin")
-          {
-            console.log("User is Admin")
-          }else if(checkRole.role[0].role==="cashier"){
-            console.log("User is Cashier")
-          }else{
-            console.log("User role is unknown")
+        if(checkRole.role){
+          setUserRole(checkRole.role[0].role!)
+          if (checkRole.role[0].role!=="admin" && checkRole.role[0].role!=="cashier"){
+              alert("Unauthorized");
+              navigate("/");
           }
         }
       }else{
-        alert("Unauthorized");
-        navigate("/");
+        alert("You need to Log in")
+        navigate("/")
       }
     }
     checkUser();
@@ -60,8 +57,8 @@ const AdminPage: React.FC = () => {
         return <Transaction />;
       case "customerList":
         return <CustomerList />;
-      case "testing":
-        return <ProductListnStock />;
+      case "addEmployee":
+        return <EmployeeRegister />;
       default:
         return <Transaction />;
     }
@@ -70,7 +67,7 @@ const AdminPage: React.FC = () => {
   return (
     <div className="flex justify-around">
       <div className="items-start">
-        <SideMenu onMenuClick={handleSideMenuClick} />
+        <SideMenu onMenuClick={handleSideMenuClick} userRole={userRole}/>
       </div>
       <div className="w-screen">
         <div className="mx-auto">

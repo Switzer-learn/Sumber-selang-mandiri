@@ -1,24 +1,24 @@
 import React, { useState } from "react";
 import { api } from "../../service/api";
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 interface SideMenuProps {
   onMenuClick: (menu: string) => void;
+  userRole: string; // Added userRole prop
 }
 
-const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
+const SideMenu: React.FC<SideMenuProps> = ({ onMenuClick, userRole }) => {
   const [inventoryOpen, setInventoryOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false); // For mobile responsiveness
-  //const [serviceOpen, setServiceOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogOut = async() =>{
+  const handleLogOut = async () => {
     const response = await api.logout();
-    if(response.status===200){
-      alert("Successfull logout")
+    if (response.status === 200) {
+      alert("Successful logout");
       navigate("/");
     }
-  }
+  };
 
   return (
     <div>
@@ -47,75 +47,79 @@ const SideMenu:React.FC<SideMenuProps> = ({onMenuClick}) => {
         <div className="flex flex-col justify-center gap-3 my-10 mx-auto font-bold text-white">
           <span className="text-center text-xl">Menu</span>
           <div>
-            <div>
-              <button
-                className="w-full text-left py-2 px-4 hover:bg-green-700"
-                onClick={() => setInventoryOpen(!inventoryOpen)}
-              >
-                Produk
-              </button>
-              {inventoryOpen && (
-                <ul className="px-4 text-md font-normal flex flex-col">
+            {userRole === "cashier" ? (
+              <>
+                <button
+                  className="w-full text-left py-2 px-4 hover:bg-green-700"
+                  onClick={() => onMenuClick("cashier")}
+                >
+                  Penjualan
+                </button>
+              </>
+            ) : (
+              <>
+                <div>
                   <button
-                    className="hover:text-lg text-start py-1 px-2"
-                    onClick={() => onMenuClick("addInventory")}
+                    className="w-full text-left py-2 px-4 hover:bg-green-700"
+                    onClick={() => setInventoryOpen(!inventoryOpen)}
                   >
-                    Tambah Produk
+                    Produk
                   </button>
+                  {inventoryOpen && (
+                    <ul className="px-4 text-md font-normal flex flex-col">
+                      <button
+                        className="hover:text-lg text-start py-1 px-2"
+                        onClick={() => onMenuClick("addInventory")}
+                      >
+                        Tambah Produk
+                      </button>
+                      <button
+                        className="hover:text-lg text-start py-1 px-2"
+                        onClick={() => onMenuClick("addInventoryPurchase")}
+                      >
+                        Pembelian Produk
+                      </button>
+                      <button
+                        className="hover:text-lg text-start py-1 px-2"
+                        onClick={() => onMenuClick("inventoryList")}
+                      >
+                        List Produk & Stock
+                      </button>
+                      <button
+                        className="hover:text-lg text-start py-1 px-2"
+                        onClick={() => onMenuClick("purchaseList")}
+                      >
+                        History Pembelian
+                      </button>
+                    </ul>
+                  )}
+                </div>
+                <div>
                   <button
-                    className="hover:text-lg text-start py-1 px-2"
-                    onClick={() => onMenuClick("addInventoryPurchase")}
+                    className="w-full text-left py-2 px-4 hover:bg-green-700"
+                    onClick={() => onMenuClick("RevenueReport")}
                   >
-                    Pembelian Produk
+                    Laporan Penjualan
                   </button>
+                </div>
+                <div>
                   <button
-                    className="hover:text-lg text-start py-1 px-2"
-                    onClick={() => onMenuClick("inventoryList")}
+                    className="w-full text-left py-2 px-4 hover:bg-green-700"
+                    onClick={() => onMenuClick("customerList")}
                   >
-                    List Produk & Stock
+                    List Pelanggan
                   </button>
+                </div>
+                <div>
                   <button
-                    className="hover:text-lg text-start py-1 px-2"
-                    onClick={() => onMenuClick("purchaseList")}
+                    className="w-full text-left py-2 px-4 hover:bg-green-700"
+                    onClick={() => onMenuClick("addEmployee")}
                   >
-                    History Pembelian
+                    Tambah Pegawai
                   </button>
-
-                </ul>
-              )}
-            </div>
-            <div>
-              <button
-                className="w-full text-left py-2 px-4 hover:bg-green-700"
-                onClick={() => onMenuClick("RevenueReport")}
-              >
-                Laporan Penjualan
-              </button>
-            </div>
-            <div>
-              <button
-                className="w-full text-left py-2 px-4 hover:bg-green-700"
-                onClick={() => onMenuClick("cashier")}
-              >
-                Penjualan
-              </button>
-            </div>
-            <div>
-              <button
-                className="w-full text-left py-2 px-4 hover:bg-green-700"
-                onClick={() => onMenuClick("customerList")}
-              >
-                List Pelanggan
-              </button>
-            </div>
-            <div>
-              <button
-                className="w-full text-left py-2 px-4 hover:bg-green-700"
-                onClick={() => onMenuClick("testing")}
-              >
-                Testing
-              </button>
-            </div>
+                </div>
+              </>
+            )}
             <div>
               <button
                 className="w-full text-left py-2 px-4 hover:bg-green-700"

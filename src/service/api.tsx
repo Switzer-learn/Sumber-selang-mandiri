@@ -79,7 +79,7 @@ export const api = {
               }])
               .select()
             if(error){
-              return {status:500, message:error,data:[]}
+              return {status:500, message:error.message,data:[]}
             }
             return {status:200,data:data,message:"success"}
         } catch (error) {
@@ -92,7 +92,7 @@ export const api = {
       const{data,error} = await supabase.rpc('get_purchase_details');
       if(error){
         console.log(error)
-        return {status:500, message:error,data:[]}
+        return {status:500, message:error.message,data:[]}
       }
       console.log(data)
       return {status:200,data:data,message:"success"}
@@ -106,7 +106,7 @@ export const api = {
               .order("name", { ascending: true });
 
             if(error){
-              return {status:500, message:error,data:[]}
+              return {status:500, message:error.message,data:[]}
             }
             return {status:200,data:data,message:"success"};
         } catch (error) {
@@ -132,6 +132,50 @@ export const api = {
         }
     },
 
+    updateProduct : async(input:dbProducts) => {
+      const {id,name,description,type,unit,sell_price} = input
+        try {
+            const {data,error} = await supabase
+              .from("products")
+              .update({
+                name:name,
+                description:description,
+                type:type,
+                unit:unit,
+                sell_price:sell_price
+              })
+              .eq("id",id)
+              .select()
+            if(error){
+              return {status:500, message:error.message,data:[]}
+            }
+            return {status:200,data:data,message:"success"}
+        } catch (error) {
+            console.error(error);
+            return {status:500, message:error,data:[]};
+        }
+    },
+
+    deleteProduct : async(input:dbProducts) => {
+      const {id} = input
+        try {
+            const {data,error} = await supabase
+              .from("products")
+              .delete()
+              .eq("id",id)
+              .select()
+            if(error){
+              return {status:500, message:error.message,data:[]}
+            }
+            return {status:200,data:data,message:"success"}
+        } catch (error) {
+          console.log(error)
+          return {status:500,message:error,data:[]};
+        }
+    },
+      
+    
+
     addTransactions: async(input:TransactionInputData) => {
       const {customer_id,cashier_id,grand_total,metode_pembayaran} = input
         try {
@@ -144,7 +188,7 @@ export const api = {
                 grand_total: grand_total
               }).select();
             if(error){
-              return {status:500, message:error,data:[]}
+              return {status:500, message:error.message,data:[]}
             }
             return {status:200,data:data,message:"success"}
         } catch (error) {
@@ -166,7 +210,7 @@ export const api = {
                 total_price:amount*price
               }])
               if(error){
-                return {status:500, message:error,data:[]}
+                return {status:500, message:error.message,data:[]}
               }
               return {status:200,data:data,message:"success"}
 
@@ -181,7 +225,7 @@ export const api = {
               .rpc("get_transaction_details");
 
             if(error){
-              return {status:500,message:error}
+              return {status:500,message:error.message,data:[]}
             }
             return {status:200,data:data};
         } catch (error) {
@@ -190,6 +234,7 @@ export const api = {
     },
 
     addCustomer : async(input:dbCustomers) => {
+      console.log(input)
       const {name,phone_number,address,cash_bon} = input
         try {
             const {data,error} = await supabase
@@ -221,11 +266,35 @@ export const api = {
               .order("name",{ascending:true});
 
             if(error){
-              return {status:500,message:error};
+              return {status:500,message:error.message};
             }
             return {status:200,data:data};
         } catch (error) {
             console.error(error);
+        }
+    },
+
+    updateCustomer: async (input: dbCustomers) => {
+        const { id, name, phone_number, address, cash_bon } = input;
+        try {
+            const { data, error } = await supabase
+              .from("customers")
+              .update({
+                name: name,
+                phone_number: phone_number,
+                address: address,
+                cash_bon: cash_bon
+              })
+              .eq("id", id)
+              .select();
+              
+            if (error) {
+                return { status: 500, message: error.message };
+            }
+            return { status: 200, data: data, message: "Customer updated successfully" };
+        } catch (error) {
+            console.error(error);
+            return { status: 500, message: error };
         }
     },
 
@@ -241,7 +310,7 @@ export const api = {
                                         })
                                         .select();
             if(error){
-                return {status:500,message:error}
+                return {status:500,message:error.message}
             }
             return {status:200,message:"Penambahan user berhasil"}
         } catch (error) {
@@ -282,7 +351,7 @@ export const api = {
         });
       
         if (error) {
-          return {status:500,message:error}
+          return {status:500,message:error.message}
         }
         return {status:200,message:'Password email sent'}
       },
@@ -293,7 +362,7 @@ export const api = {
         });
       
         if (error) {
-          return {message:error,status:500};
+          return {message:error.message,status:500};
         } else {
           return {status:200,message:'Password resetted'}
         }

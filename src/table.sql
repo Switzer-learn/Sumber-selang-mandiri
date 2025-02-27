@@ -168,8 +168,38 @@ FOR UPDATE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
 CREATE POLICY delete_product_purchases ON product_purchases
 FOR DELETE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'admin');
 
+-- ✅ Allow cashiers to access the customers table
+CREATE POLICY select_customers_cashier ON customers
+FOR SELECT TO authenticated
+USING ((SELECT role FROM users WHERE id = auth.uid()) = 'cashier');
 
+CREATE POLICY insert_customers_cashier ON customers
+FOR INSERT WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'cashier');
 
+CREATE POLICY update_customers_cashier ON customers
+FOR UPDATE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'cashier');
+
+-- ✅ Allow cashiers to access transactions
+CREATE POLICY insert_transactions_cashier ON transactions
+FOR INSERT WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'cashier');
+
+-- ✅ Allow cashiers to access transaction items
+CREATE POLICY insert_transaction_items_cashier ON transaction_items
+FOR INSERT WITH CHECK ((SELECT role FROM users WHERE id = auth.uid()) = 'cashier');
+
+-- ✅ Allow cashiers to access products
+CREATE POLICY update_products_cashier ON products
+FOR UPDATE USING ((SELECT role FROM users WHERE id = auth.uid()) = 'cashier');
+
+-- ✅ Allow cashiers to access products
+CREATE POLICY select_products_cashier ON products
+FOR SELECT TO authenticated
+USING ((SELECT role FROM users WHERE id = auth.uid()) = 'cashier');
+
+-- ✅ Allow cashiers to access transactions
+CREATE POLICY select_transactions_cashier ON transactions
+FOR SELECT TO authenticated
+USING ((SELECT role FROM users WHERE id = auth.uid()) = 'cashier');
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;

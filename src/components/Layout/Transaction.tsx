@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import TransactionTable from "../UI/TransactionTable";
 import PaymentModal from "../Modals/PaymentModal";
 import { api } from "../../service/api";
+import { formatPrice } from "../../function.tsx/function";
 
 interface onFetchProductInterface {
   name: string;
@@ -117,7 +118,7 @@ const Transaction = () => {
 
           <div className="flex flex-col gap-2">
             <label htmlFor="cashBon" className="font-medium">Cash Bon (Hutang Pelanggan):</label>
-            <span id="cashBon" className="border rounded-lg px-3 py-4">{cashBon}</span>
+            <span id="cashBon" className="border rounded-lg px-3 py-4">{formatPrice(cashBon)}</span>
           </div>
         </div>
 

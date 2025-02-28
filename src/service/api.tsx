@@ -347,7 +347,7 @@ export const api = {
       
       forgotPassword:async(email:string)=>{
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: "https://sakuraspabwi.com/reset-password", // Customize this
+          redirectTo: "http://localhost:5173/newPassword", // Customize this
         });
       
         if (error) {

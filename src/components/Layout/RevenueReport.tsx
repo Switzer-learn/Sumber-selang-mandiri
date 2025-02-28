@@ -81,7 +81,7 @@ const RevenueReport = () => {
     const handleDateChange = (date: string) => {
         setDate(date);
         // Filter transactions based on the selected date
-        const filteredTransactions = originalTransaction.filter((transaction) => transaction.date === date);
+        const filteredTransactions = originalTransaction.filter((transaction) => transaction.date.slice(0,10) === date);
         setTransactionData(filteredTransactions);
     };
 

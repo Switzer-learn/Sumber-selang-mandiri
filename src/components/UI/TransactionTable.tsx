@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { formatPrice } from "../../function.tsx/function";
+import { formatPrice } from "../../function/function";
 import { Autocomplete, TextField } from "@mui/material";
 import { SelectedProduct } from "../interface/SelectedProductInterface";
 import { api } from "../../service/api"

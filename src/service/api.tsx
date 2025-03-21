@@ -25,12 +25,14 @@ export const api = {
   addProduct: async (input: dbProducts) => {
       try {  
           // Insert product with the authenticated user's ID
+          console.log(input);
           const { error: insertError } = await supabase.from("products").insert({
               name: input.name,
               type: input.type,
               unit: input.unit,
               description: input.description,
               sell_price: input.sell_price,
+              categories: input.categories
           })
   
           if (insertError) {

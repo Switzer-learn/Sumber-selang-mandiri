@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import TransactionTable from "../UI/TransactionTable";
 import PaymentModal from "../Modals/PaymentModal";
 import { api } from "../../service/api";
-import { formatPrice } from "../../function.tsx/function";
+import { formatPrice } from "../../function/function";
 
 interface onFetchProductInterface {
   name: string;

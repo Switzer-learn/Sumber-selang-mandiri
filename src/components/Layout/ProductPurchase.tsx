@@ -224,7 +224,7 @@ const ProductPurchase: React.FC = () => {
               type="number"
               className="text-center font-semibold text-sm md:text-base border rounded"
               value={item.quantity_purchased}
-              onChange={(e) => handleAmountChange(index, parseInt(e.target.value))}
+              onChange={(e) => handleAmountChange(index, parseFloat(e.target.value))}
               label="Quantity Pembelian"
             />
 

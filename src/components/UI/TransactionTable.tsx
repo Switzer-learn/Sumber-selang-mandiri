@@ -155,7 +155,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onFetchProduct }) =
             <input
               type="number"
               value={item.amount}
-              onChange={(e) => handleAmountChange(index, parseInt(e.target.value) || 0)}
+              onChange={(e) => handleAmountChange(index, parseFloat(e.target.value) || 0)}
               className="border p-2 rounded-lg shadow-md w-full"
             />
 

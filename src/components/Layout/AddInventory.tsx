@@ -51,7 +51,7 @@ const AddInventoryForm: React.FC = () => {
       stock:0,
       avg_buy_price:0
     };
-    console.log(formData.type)
+    //console.log(formData.type)
     confirm("Apakah data sudah benar?");
     const addProductResponse = await api.addProduct(formData);
     if(addProductResponse){

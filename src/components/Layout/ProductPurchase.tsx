@@ -29,7 +29,7 @@ const ProductPurchase: React.FC = () => {
         { event: "INSERT", schema: "public", table: "product_purchases" },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (payload: RealtimePostgresChangesPayload<any>) => {
-          console.log("insert product_purchases", payload);
+          //console.log("insert product_purchases", payload);
           setSelectedProducts((prev) => [...prev, payload.new]);
         }
       )
@@ -38,7 +38,7 @@ const ProductPurchase: React.FC = () => {
         { event: "UPDATE", schema: "public", table: "product_purchases" },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (payload: RealtimePostgresChangesPayload<any>) => {
-          console.log("update product_purchases", payload);
+          //console.log("update product_purchases", payload);
           setSelectedProducts((prev) =>
             prev.map((item) =>
               item.product_id === payload.new.product_id ? payload.new : item
@@ -55,7 +55,7 @@ const ProductPurchase: React.FC = () => {
         { event: "INSERT", schema: "public", table: "products" },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (payload: RealtimePostgresChangesPayload<any>) => {
-          console.log("insert products", payload);
+          //console.log("insert products", payload);
           setOriginalProducts((prev) => [...prev, payload.new]);
         }
       )
@@ -64,7 +64,7 @@ const ProductPurchase: React.FC = () => {
         { event: "UPDATE", schema: "public", table: "products" },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (payload: RealtimePostgresChangesPayload<any>) => {
-          console.log("update products", payload);
+          //console.log("update products", payload);
           setOriginalProducts((prev) =>
             prev.map((item) => (item.id === payload.new.id ? payload.new : item))
           );
@@ -81,7 +81,7 @@ const ProductPurchase: React.FC = () => {
   useEffect(() => {
         const fetchProducts = async()=>{
            const fetchProductsResponse = await api.fetchProducts();
-           console.log(fetchProductsResponse?.data);
+           //console.log(fetchProductsResponse?.data);
            if(fetchProductsResponse){
                if(fetchProductsResponse.status===200){
                    setOriginalProducts(fetchProductsResponse.data);
@@ -104,7 +104,7 @@ const ProductPurchase: React.FC = () => {
   const handleProductChange = (index: number, value: string) => {
     const trimmedValue = value.trim(); // Ensure no extra spaces
     const product = originalProducts.find((p) => p.name === trimmedValue);
-    console.log(product)
+    //console.log(product)
     if(product === undefined) return;
     setSelectedProducts((prev) =>
       prev.map((item, i) =>
@@ -144,7 +144,7 @@ const ProductPurchase: React.FC = () => {
       });
     });
   
-    console.log(selectedProducts);
+    //console.log(selectedProducts);
     const purchaseProductsResponse = await Promise.all(purchaseProductsPromise);
     const hasErrors = purchaseProductsResponse.some(
       (res) => !res || res.status !== 200

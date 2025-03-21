@@ -105,6 +105,15 @@ const SideMenu: React.FC<SideMenuProps> = ({ onMenuClick, userRole }) => {
                 <div>
                   <button
                     className="w-full text-left py-2 px-4 hover:bg-green-700"
+                    onClick={() => onMenuClick("cashier")}
+                  >
+                    Penjualan
+                  </button>
+                </div>
+                
+                <div>
+                  <button
+                    className="w-full text-left py-2 px-4 hover:bg-green-700"
                     onClick={() => onMenuClick("customerList")}
                   >
                     List Pelanggan

@@ -25,9 +25,10 @@ CREATE TABLE products (
     type TEXT CHECK (type IN ('goods', 'service')) NOT NULL,
     description TEXT,
     unit TEXT, --satuan
-    stock INTEGER, -- Only applies to 'goods'; NULL for 'service'
+    stock FLOAT, -- Only applies to 'goods'; NULL for 'service'
     avg_buy_price NUMERIC, -- Average buying price (for reporting)
     sell_price NUMERIC NOT NULL, -- Current selling price
+    categories TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     last_updated TIMESTAMPTZ DEFAULT NOW()
 );
@@ -38,7 +39,7 @@ CREATE TABLE product_purchases (
     product_id uuid REFERENCES products(id),
     purchase_date TIMESTAMPTZ DEFAULT NOW(),
     buying_price NUMERIC NOT NULL,
-    quantity_purchased INTEGER NOT NULL
+    quantity_purchased FLOAT NOT NULL
 );
 
 -- 5. Create Customers Table
@@ -67,7 +68,7 @@ CREATE TABLE transaction_items (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     transaction_id uuid REFERENCES transactions(id),
     product_id uuid REFERENCES products(id),
-    quantity INTEGER NOT NULL,
+    quantity FLOAT NOT NULL,
     unit_price NUMERIC NOT NULL,
     total_price NUMERIC NOT NULL, -- Usually: quantity * unit_price (discount applied if any)
     discount NUMERIC DEFAULT 0, -- Optional: discount per item
@@ -218,7 +219,7 @@ RETURNS TABLE (
     transaction_payment_type TEXT,
 
     product_name TEXT,
-    product_quantity INTEGER,
+    product_quantity FLOAT,
     product_price NUMERIC,
     product_discount NUMERIC,
 
@@ -261,7 +262,7 @@ DROP FUNCTION IF exists get_purchase_details();
 CREATE OR REPLACE FUNCTION get_purchase_details()
 RETURNS TABLE (
     purchase_id UUID, -- Changed from VARCHAR to UUID
-    purchase_quantity INTEGER,
+    purchase_quantity FLOAT,
     buying_price NUMERIC,
     purchase_date TIMESTAMPTZ,
     product_name TEXT, -- Changed from VARCHAR to TEXT (matches `name` column type)

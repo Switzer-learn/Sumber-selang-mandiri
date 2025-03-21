@@ -7,6 +7,7 @@ export interface dbProducts {
     stock: number | 0;
     avg_buy_price: number | 0;
     sell_price:number;    
+    categories: string;
     created_at?: string;
     last_updated?: string;
 }

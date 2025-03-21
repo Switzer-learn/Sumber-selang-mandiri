@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { formatPrice } from "../../function.tsx/function";
+import { formatPrice } from "../../function/function";
 import { api } from "../../service/api";
 
 interface Transaction {

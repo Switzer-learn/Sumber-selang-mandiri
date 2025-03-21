@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { formatPrice } from "../../function.tsx/function";
+import { formatPrice } from "../../function/function";
 import { api } from "../../service/api";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";

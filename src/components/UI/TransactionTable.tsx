@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { formatPrice } from "../../function.tsx/function";
+import { formatPrice } from "../../function/function";
 import { Autocomplete, TextField } from "@mui/material";
 import { SelectedProduct } from "../interface/SelectedProductInterface";
 import { api } from "../../service/api"
@@ -155,7 +155,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onFetchProduct }) =
             <input
               type="number"
               value={item.amount}
-              onChange={(e) => handleAmountChange(index, parseInt(e.target.value) || 0)}
+              onChange={(e) => handleAmountChange(index, parseFloat(e.target.value) || 0)}
               className="border p-2 rounded-lg shadow-md w-full"
             />
 

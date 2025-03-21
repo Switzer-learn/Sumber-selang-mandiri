@@ -1,4 +1,4 @@
-import {useEffect,useState} from "react";
+import { useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { dbProducts } from "../interface/dbInterfaces";
@@ -11,25 +11,34 @@ const AddInventoryForm: React.FC = () => {
   const [hargaJual, setHargaJual] = useState<number>(0);
   const [inventoryName, setInventoryName] = useState<string>("");
   const [inventoryData, setInventoryData] = useState<dbProducts[]>([]);
-  const [jenis,setJenis] = useState<string>("goods");
+  const [jenis, setJenis] = useState<string>("goods");
+  const [categories, setCategories] = useState<string>("");
+  const [newCategory, setNewCategory] = useState<string>("");
 
 
-  useEffect(()=>{
-    const fetchProducts = async() =>{
-        const fetchProductsResponse = await api.fetchProducts();
-        if(fetchProductsResponse){
-            if(fetchProductsResponse.status===200){
-                setInventoryData(fetchProductsResponse.data);
-            }else{
-                alert(fetchProductsResponse.message);
-                console.log(fetchProductsResponse);
-            }
-        }else{
-            return;
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const fetchProductsResponse = await api.fetchProducts();
+      if (fetchProductsResponse) {
+        if (fetchProductsResponse.status === 200) {
+          setInventoryData(fetchProductsResponse.data);
+        } else {
+          alert(fetchProductsResponse.message);
+          console.log(fetchProductsResponse);
         }
-    }
+      } else {
+        return;
+      }
+    };
     fetchProducts();
-  },[])
+  }, []);
+
+  const uniqueSatuan = Array.from(
+    new Set(inventoryData.map((item) => item.unit))).sort((a, b) => a.localeCompare(b));
+  
+  const uniqueCategories = Array.from(
+    new Set(inventoryData.map((item) => item.categories).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
 
   // Reset form fields
   const resetForm = () => {
@@ -38,29 +47,35 @@ const AddInventoryForm: React.FC = () => {
     setSatuan("pcs");
     setKeterangan("");
     setHargaJual(0);
+    setCategories("");
+    setNewCategory("");
   };
 
   const handleSubmit = async (_event: React.FormEvent) => {
     _event.preventDefault();
+    
+    const finalCategory = categories === "newCategory" ? newCategory.trim() : categories;
+
+    const finalSatuan = satuan === "newSatuan" ? newCategory.trim() : satuan;
+
     const formData = {
-      name:inventoryName,
-      type:jenis,
-      unit:satuan,
-      description:keterangan,
-      sell_price:hargaJual,
-      stock:0,
-      avg_buy_price:0
+      name: inventoryName,
+      type: jenis,
+      unit: finalSatuan,
+      description: keterangan,
+      sell_price: hargaJual,
+      stock: 0,
+      avg_buy_price: 0,
+      categories: finalCategory,
     };
-    //console.log(formData.type)
+
     confirm("Apakah data sudah benar?");
     const addProductResponse = await api.addProduct(formData);
-    if(addProductResponse){
-      if(addProductResponse.status===200){
-        alert(addProductResponse.message)
-      }else{
-        alert(addProductResponse.message);
-        console.log(addProductResponse);
-      }
+    if (addProductResponse?.status === 200) {
+      alert(addProductResponse.message);
+    } else {
+      alert(addProductResponse.message);
+      console.log(addProductResponse);
     }
   };
 
@@ -114,11 +129,31 @@ const AddInventoryForm: React.FC = () => {
             onChange={(e) => setSatuan(e.target.value)}
             className="border rounded p-2"
           >
-            <option value="pcs">Pcs</option>
-            <option value="meter">Meter</option>
-            <option value="box">Box</option>
+            <option value="" disabled>Pilih Satuan</option>
+            {uniqueSatuan.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+            <option value="newSatuan">Tambah satuan</option>
           </select>
         </div>
+
+        {satuan === "newSatuan" && (
+          <div className="flex flex-col gap-2">
+            <label htmlFor="newSatuan" className="font-medium">
+              Nama Satuan:
+            </label>
+            <TextField
+              id="newSatuan"
+              type="text"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              label="Satuan"
+              required
+            />
+          </div>
+        )}
 
         {/* Harga */}
         <div className="flex flex-col gap-2">
@@ -151,6 +186,45 @@ const AddInventoryForm: React.FC = () => {
           </select>
         </div>
 
+        {/* Kategori */}
+        {jenis === "goods" && (
+          <div className="flex flex-col gap-2">
+            <label htmlFor="kategori" className="font-medium">
+              Kategori:
+            </label>
+            <select
+              id="kategori"
+              value={categories}
+              onChange={(e) => setCategories(e.target.value)}
+              className="border rounded p-2"
+            >
+              <option value="" disabled>Pilih Kategori</option>
+              <option value="newCategory">Input kategori baru</option>
+              {uniqueCategories.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Input kategori baru */}
+        {categories === "newCategory" && (
+          <div className="flex flex-col gap-2">
+            <label htmlFor="newCategory" className="font-medium">
+              Nama Kategori Baru:
+            </label>
+            <TextField
+              id="newCategory"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              label="Kategori Baru"
+              required
+            />
+          </div>
+        )}
+
         {/* Keterangan */}
         <div className="col-span-2 flex flex-col gap-2">
           <label htmlFor="keterangan" className="font-medium">
@@ -168,17 +242,10 @@ const AddInventoryForm: React.FC = () => {
 
         {/* Buttons */}
         <div className="col-span-2 flex justify-between">
-          <button
-            type="button"
-            onClick={resetForm}
-            className="rounded-lg bg-gray-500 hover:bg-gray-600 text-white px-6 py-2"
-          >
+          <button type="button" onClick={resetForm} className="rounded-lg bg-gray-500 hover:bg-gray-600 text-white px-6 py-2">
             Reset
           </button>
-          <button
-            type="submit"
-            className="rounded-lg bg-blue-500 hover:bg-blue-600 text-white px-6 py-2"
-          >
+          <button type="submit" className="rounded-lg bg-blue-500 hover:bg-blue-600 text-white px-6 py-2">
             Submit
           </button>
         </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../../service/api";
-import { formatPrice } from "../../function.tsx/function";
+import { formatPrice } from "../../function/function";
 
 interface PurchaseHistory {
     purchase_id: string;

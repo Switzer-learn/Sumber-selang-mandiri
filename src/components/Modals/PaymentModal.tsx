@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { api } from "../../service/api";
-import { currentDate } from "../../function.tsx/function";
+import { currentDate } from "../../function/function";
 
 interface PaymentModalProps {
   open: boolean;
